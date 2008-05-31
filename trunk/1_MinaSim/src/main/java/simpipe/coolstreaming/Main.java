@@ -17,6 +17,9 @@ import se.peertv.peertvsim.core.Scheduler;
 import simpipe.SimPipeAcceptor;
 import simpipe.SimPipeAddress;
 import simpipe.SimPipeConnector;
+import simpipe.coolstreaming.visualization.MembersStructure;
+import simpipe.coolstreaming.visualization.MembershipVisualization;
+import simpipe.coolstreaming.visualization.TimeSlot;
 
 
 public class Main extends EventLoop{
@@ -75,42 +78,40 @@ public class Main extends EventLoop{
 	 @Override
 	 protected void postSimulationLoop() {
 		 super.preSimulationLoop();
+		 System.out.println(Scheduler.getInstance().now);
 		 displayEnd();
 	 }
 	 
 	 public  void displayEnd(){
 		 System.out.println("END");
-		 /*
+		 
 		 for(int i=0;i<client.length;i++){
 			 if(client[i]==null)
 				 continue;
-			 System.out.print(client[i].allIndex+"-->"+client[i].continuityIndex+" [Peer "+client[i].port+"] : now my friends are  : ");
+			 System.out.println("[Peer "+client[i].port+"] : ");
+			 double CI=((double)client[i].continuityIndex)/((double)client[i].allIndex);
+			 System.out.println("continuity index = "+CI);
+			 System.out.print("My Partners are  : ");
 	    		for(int j=0;j<client[i].pSize;j++){
-	    			if(client[i].pCache[j]!=0)
-	    				System.out.print(" - "+(client[i].pCache[j]));
+	    			if(client[i].partners.pCache[j]!=null)
+	    				System.out.print(" - "+(client[i].partners.pCache[j].port));
 	    		}
-	    		
+	    		System.out.println("\n");
+	    		System.out.print("My Buffer Map : ");
 	    		for(int j=0;j<client[i].videoSize;j++)
 	    		System.out.print(client[i].scheduler.wholeBits[j]);
 	    		System.out.println("\n");
+	    		System.out.println("\n-----------------------------------------------");
+	   		 
 		 }
-		 */
 		 
-		 for(int i=0;i<6;i++){
-			 System.out.println("\n-----------------------------------------------");
-			 System.out.println(" For peer "+client[i].port+" My members are : ");
-			 for(int j=0;j<client[i].mSize;j++){
-				 System.out.print(client[i].mCache[j]+" - ");
-			 }
-		 }
 		 
 		 visualization.init();
 		 visualization.view(0);
 		 
 			
 	 }
-  boolean start=true;
-  boolean start2=true;
+  
 	@Override
 	protected boolean postEventExecution() {
 		// TODO Auto-generated method stub
@@ -124,27 +125,6 @@ public class Main extends EventLoop{
 				else
 				slot.add(new MembersStructure(empty,String.valueOf(client[i].port)));
 			visualization.add(slot);
-		}
-		
-		if(Scheduler.getInstance().now>10000&&start){
-			start=false;
-			for(int i=0;i<6;i++){
-				 System.out.println("\n-----------------------------------------------");
-				 System.out.println(" For peer "+client[i].port+" My members are : ");
-				 for(int j=0;j<client[i].mSize;j++){
-					 System.out.print(client[i].mCache[j]+" - ");
-				 }
-			 }
-		}
-		if(Scheduler.getInstance().now>20000&&start2){
-			start2=false;
-			for(int i=0;i<6;i++){
-				 System.out.println("\n-----------------------------------------------");
-				 System.out.println(" For peer "+client[i].port+" My members are : ");
-				 for(int j=0;j<client[i].mSize;j++){
-					 System.out.print(client[i].mCache[j]+" - ");
-				 }
-			 }
 		}
 		
 		return false;

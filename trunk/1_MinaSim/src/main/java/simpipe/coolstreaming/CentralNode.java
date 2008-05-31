@@ -30,9 +30,9 @@ public class CentralNode extends Node {
     boolean firstConn=true;
     
     public void delete(int port){
-    	deletePartner(port);
     	//System.err.println("id("+this.PORT+") : Member("+port+") timeout ");
     }
+
     
     @Override
 	public void sessionCreated(IoSession session) throws Exception {
@@ -41,15 +41,13 @@ public class CentralNode extends Node {
     }
 
     public void sessionClosed(IoSession session) {
-        //System.out.println("SERVER : ");
-        //for(int i=0;i<mCache.length;i++)
-        //	System.out.println("=> "+mCache[i]);
+       
     }
 
     public void messageReceived(IoSession session, Object message) {
     	String msg=(String)message;
         String msgPart2=msg.substring(1);
-    	if(msg.charAt(0)=='c'){
+    	if(msg.charAt(0)=='c'){ //i.e. another client writes to me because he wants to join the network
     		    int client=Integer.parseInt(session.getRemoteAddress().toString());
     		    int port=this.getAnotherDeputy(client);
     			addMember(client);

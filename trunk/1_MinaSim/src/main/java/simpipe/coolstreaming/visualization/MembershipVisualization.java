@@ -1,4 +1,4 @@
-package simpipe.coolstreaming;
+package simpipe.coolstreaming.visualization;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -26,7 +26,7 @@ public class MembershipVisualization extends JFrame{
 	ChartPanel chartPanel;
 	boolean init=true;
 	
-	void init(){
+	public void init(){
 		for(int i=0;i<10;i++)
 			slots.add(new TimeSlot());
 		this.setBounds(150,150,800,600);
@@ -62,11 +62,11 @@ public class MembershipVisualization extends JFrame{
 		this.add(next,BorderLayout.EAST);
 	}
 	
-	void add(TimeSlot t){
+	public void add(TimeSlot t){
 		slots.add(t);
 	}
-	void view(int time){
-		System.out.println("time now = "+time);
+	public void view(int time){
+		
 		TimeSlot slot= slots.get(time);
 		final DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 		for(int i=0;i<slot.slots.size();i++){
@@ -81,6 +81,11 @@ public class MembershipVisualization extends JFrame{
         if(init){
             chartPanel = new ChartPanel(chart);
             chartPanel.setPreferredSize(new java.awt.Dimension(500, 400));
+            
+            CategoryPlot plot = chart.getCategoryPlot();
+            BarRenderer  barRenderer = (BarRenderer)plot.getRenderer();
+            barRenderer.setItemLabelsVisible(true);
+            
             this.add(chartPanel);
             init=false;
             this.pack();
@@ -110,22 +115,4 @@ public class MembershipVisualization extends JFrame{
         
     }
 	
-}
-
-class TimeSlot{
-	ArrayList<MembersStructure> slots=new ArrayList<MembersStructure>();
-	void add(MembersStructure members){
-		slots.add(members);
-	}
-}
-
-class MembersStructure{
-	int[] members;
-	String id;
-	MembersStructure(int[] members,String id){
-		this.members=new int[members.length];
-		for(int i=0;i<members.length;i++)
-			this.members[i]=members[i];
-		this.id=new String(id);
-	}
 }

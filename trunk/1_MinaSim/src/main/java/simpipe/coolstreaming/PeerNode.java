@@ -43,26 +43,29 @@ public class PeerNode extends Node {
     boolean bootStraping=true;
     Protocol protocol;
     
+    
     PeerNode(boolean source){
     	isSource=source;
     }
+    
     public void delete(int port){
     	deleteMember(port);
-    	//System.err.println("id("+this.port+") : Member("+port+") timeout ");
     }
    
-    public void regossip(int dull){
+ // the gossiping timer's firing function
+    public void regossip(int dull){  
     		try {
     			Timer t = new Timer(gossipTime,this,"regossip",0);
     		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     	gossip.initiate(hops);
     }
-    public void exchangeBM(int dull){
-    	//System.err.println("exchange...");
-    		try {
+    
+ // the BitMap's timer's firing function 
+    public void exchangeBM(int dull){ 
+    	
+    	try {
     			Timer t = new Timer(exchangeTime,this,"exchangeBM",0);
     		} catch (Exception e) {
 			e.printStackTrace();
@@ -75,10 +78,12 @@ public class PeerNode extends Node {
     	time=Schedule.startTime+(i*1000);
     	break;
     	}
-    	for(int i=0;i<pSize;i++)
-    		if(pCache[i]!=0)
-    		pSession[i].write("r"+time);
     	
+    	for(int i=0;i<pSize;i++)
+    		if(partners.pCache[i]!=null){
+    		partners.pCache[i].session.write("r"+time);
+    		
+    		}
     }
     
     void beginSceduling(){
@@ -93,7 +98,11 @@ public class PeerNode extends Node {
     
     @Override
 	public void sessionCreated(IoSession session) throws Exception {
+    	
+    	//This is the constructor of the PeerNode , its constructor cant be fired when initializing the object , but in stead I waited till first session is created (bootStraping flag) to set some settings
     	if(bootStraping){
+    		this.port=Integer.parseInt(session.getLocalAddress().toString());
+    		partners=new Partnership(pSize,port,windowSize,defaultBandwidth); 
     		bandwidth=(int)((Math.random()*512)+100);
     		scheduler = new Schedule(this);
     		bootStraping=false;
@@ -101,7 +110,6 @@ public class PeerNode extends Node {
     		gossip= new Gossip(this);
     		Timer t = new Timer(gossipTime,this,"regossip",0);
     		gossip.initiate(hops);
-    		this.port=Integer.parseInt(session.getLocalAddress().toString());
     		int listenPort=Integer.parseInt(session.getLocalAddress().toString())+CentralNode.PORT;
     		IoServiceConfig config;
     		IoAcceptor acceptor;
@@ -125,22 +133,19 @@ public class PeerNode extends Node {
 			
 		}
 		else{
-			if(getLength(pCache)==pSize)
+			if(partners.getLength()==pSize)
 				return;
+			boolean added=partners.addPartner(Integer.parseInt(session.getRemoteAddress().toString()), session);
+			if(added)
 			session.write("a"+this.port);
-			addPartner(Integer.parseInt(session.getRemoteAddress().toString()), session);
-			//System.out.print("[Peer "+port+"] : now my friends are  : ");
-    		for(int i=0;i<pSize;i++)
-    			if(pCache[i]!=0){}
-    				//System.out.print(" - "+(pCache[i]));
-    		//System.out.println("\n");
+			
 		}
 		
     }
 
 	
     public void sessionClosed(IoSession session) {
-    	clearPartners();
+    	partners.clearPartners();
      }
 
     public void messageReceived(IoSession session, Object message) {
@@ -148,46 +153,46 @@ public class PeerNode extends Node {
         String msg=(String)message;
         String msgPart2=msg.substring(1);
         
-        if(msg.charAt(0)=='d'){
+        if(msg.charAt(0)=='d'){ // your deputy is X 
         	protocol.deputyMessage(msgPart2, session);
         }
-        else if(msg.charAt(0)=='c'){
+        else if(msg.charAt(0)=='c'){ //I want to connect to you , my id is X and I've jumped M times to get to you 
         	protocol.connectMessage(msgPart2, session);
         }
-        else if(msg.charAt(0)=='p'){
+        else if(msg.charAt(0)=='p'){ //I accept you as a partner of mine and you can have another partners which are [A-B-C-....]
             beginSceduling();
         	protocol.partnersMessage(msgPart2, session);	
         }
-        if(msg.charAt(0)=='a'){
-        	if(getLength(pCache)!=pSize)
+        if(msg.charAt(0)=='a'){ //I am already in the network but I want you to be my friend
+        	if(partners.getLength()!=pSize)
         		protocol.acceptMessage(msgPart2, session);
         	else{
         		session.write("t"+this.port);
         		session.close();
         	}
         }
-        else if(msg.charAt(0)=='m'){
+        else if(msg.charAt(0)=='m'){ //I want from you to send me your bandwidth in order to use it while calculating
         	protocol.sendBandwidth(session);
         }
-        else if(msg.charAt(0)=='n'){
+        else if(msg.charAt(0)=='n'){// My bandwidth is B
         	protocol.receiveBandwidth(msgPart2,session);
         }
-        else if(msg.charAt(0)=='t'){ 
+        else if(msg.charAt(0)=='t'){ //I am leaving now the network
         	protocol.terminateConnectionMessage(msgPart2, session);
         }
-        else if(msg.charAt(0)=='g'){
+        else if(msg.charAt(0)=='g'){ //I am gossiping to node P and this message jumped N times
         	protocol.gossipMessage(msgPart2);
         }
-        else if(msg.charAt(0)=='r'){
+        else if(msg.charAt(0)=='r'){ // I want from you the buffer map that begins from time T
         	protocol.requestBitMapMessage(msgPart2, session);
         }
-        else if(msg.charAt(0)=='b'){
+        else if(msg.charAt(0)=='b'){ // Here is my buffer map [01111100001......]
         	protocol.bitMapMessage(msgPart2);
         }
-        else if(msg.charAt(0)=='x'){
+        else if(msg.charAt(0)=='x'){ // I want from you to send me segment X
         	protocol.pingMessage(msgPart2, session);
         }
-        else if(msg.charAt(0)=='y'){
+        else if(msg.charAt(0)=='y'){ // Here are the segment that you have requested
         	protocol.pongMessage(msgPart2);
         }
         
@@ -197,6 +202,8 @@ public class PeerNode extends Node {
     public void messageSent(IoSession session, Object message) {
         
     }
+    
+    // this function is used to make my peernode connect to another peer
     void connectTo(int port){
     	BaseIoConnector connector= new SimPipeConnector();
     	SocketAddress serverPort= new SimPipeAddress(CentralNode.PORT+port);

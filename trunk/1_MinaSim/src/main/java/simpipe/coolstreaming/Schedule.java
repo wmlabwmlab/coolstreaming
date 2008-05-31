@@ -2,6 +2,10 @@ package simpipe.coolstreaming;
 
 import se.peertv.peertvsim.core.Scheduler;
 
+/*
+ * -This class is designed for scheduling which segment will be fetched from which peer
+ * -Also it hold the buffer map for the node initiating this object 
+ */
 public class Schedule {
 	Node node;
 	static int startTime;
@@ -58,16 +62,15 @@ public class Schedule {
 			return bits;
 	}
 	BitField beginscheduling(){
-		
 		BitField field = new BitField(node.windowSize);
 		int index=0;
 		int length=0;
 		int timeNow=(int)Scheduler.getInstance().now;
 		for(int i=0;i<node.windowSize;i++){
 			for(int j=0;j<node.pSize;j++){
-				if(node.pCache[j]==0)
+				if(node.partners.pCache[j]==null)
 					continue;
-				if(node.BM[j].bits[i]==1&&isValid(i,timeNow)){
+				if(node.partners.pCache[j].bufferMap.bits[i]==1&&isValid(i,timeNow)){
 					length++;
 				}
 			}
@@ -75,12 +78,12 @@ public class Schedule {
 				continue;
 			
 			index=0;
-			int supp[]=new int[length];
+			Partner supp[]=new Partner[length];
 			for(int k=0;k<node.pSize;k++){
-				if(node.pCache[k]==0)
+				if(node.partners.pCache[k]==null)
 					continue;
-				if(node.BM[k].bits[i]==1&&isValid(i,timeNow)){
-					supp[index++]=node.pCache[k];
+				if(node.partners.pCache[k].bufferMap.bits[i]==1&&isValid(i,timeNow)){
+					supp[index++]=node.partners.pCache[k];
 				}
 			}
 			
@@ -92,14 +95,14 @@ public class Schedule {
 			
 			int bandwidth[]=new int[length];
 			for(int counter=0;counter<length;counter++){
-				int pos=node.getIndex(node.pCache,supp[counter]);
+				int pos=node.partners.getIndex(supp[counter].port);
 				if(pos!=-1)
-				bandwidth[counter]=node.pBandwidth[pos];
+				bandwidth[counter]=node.partners.pCache[pos].bandwidth;
 				else
 				bandwidth[counter]=node.defaultBandwidth;
 			}
 			int pos=pickPeer(bandwidth);
-			field.setBit(i,supp[pos]);
+			field.setBit(i,supp[pos].port);
 			
 			length=0;
 			

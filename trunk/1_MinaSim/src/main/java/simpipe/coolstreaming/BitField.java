@@ -1,5 +1,9 @@
 package simpipe.coolstreaming;
 
+/*
+ * A data structure for holding the bits of the buffered map (Array of bits and some operations for handling it)
+ */
+
 public class BitField {
 
 	int bits[] ;

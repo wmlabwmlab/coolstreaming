@@ -19,7 +19,6 @@ public class Protocol {
     	node.addMember(Integer.parseInt(msgPart2));
 		}
     	else {
-			//System.out.println(node.port+" will Do NOTHINGGG WITH "+msgPart2);
 			node.beginSceduling();
 			node.searching=false;
 		}
@@ -28,12 +27,11 @@ public class Protocol {
 		String []parameters=msgPart2.split("-");
 		int destination=Integer.parseInt(parameters[1]);
 		
-		if(node.getLength(node.pCache)==node.pSize){
+		if(node.partners.getLength()==node.pSize){
 			if(Integer.parseInt(parameters[0])==0){
-				//System.out.println("Peer "+node.port+"forced to add "+destination);
-    			node.forceAddPartner(destination,session);
+				node.partners.forceAddPartner(destination,session);
     			node.addMember(destination);
-    			String ports=node.getPartners();
+    			String ports=node.partners.getPartners();
     			session.write("p"+node.port+"-"+ports);
     		}
     		else{
@@ -43,53 +41,63 @@ public class Protocol {
     	}
 		
     	else{
-			String ports=node.getPartners();
+			boolean added=node.partners.addPartner(destination,session);
+			if(added){
+			String ports=node.partners.getPartners();
 			session.write("p"+node.port+"-"+ports);
-			node.addPartner(destination,session);
 			node.addMember(destination);
-    	}
+			}
+		}
 	}
 	public void partnersMessage(String msgPart2,IoSession session){
 		node.searching=false;
 		
 		String []partners=msgPart2.split("-");
-		node.addPartner(Integer.parseInt(partners[0]),session);
-		//System.out.print("[Peer "+node.port+"] : now my friends are  : ");
-		for(int i=0;i<node.pSize;i++)
-			if(node.pCache[i]!=0){}
-				//System.out.print(" - "+(node.pCache[i]));
-		//System.out.println("\n");
-		for(int i=1;i<partners.length;i++)
+		node.partners.addPartner(Integer.parseInt(partners[0]),session);
+		for(int i=1;i<partners.length;i++){
 			node.connectTo(Integer.parseInt(partners[i]));
-		
+		}
 		
 	}
+	
 	public void acceptMessage(String msgPart2,IoSession session){
 		
 		int destination=Integer.parseInt(msgPart2);
-		node.addPartner(destination, session);
 		node.addMember(destination);
-		//System.out.println("[Peer "+node.port+"] Accepting connecting to  : "+Integer.parseInt(msgPart2));
-		//System.out.print("[Peer "+node.port+"] : now my friends are  : ");
-		//for(int i=0;i<node.pSize;i++)
-		//	if(node.pCache[i]!=0)
-				//System.out.print(" - "+(node.pCache[i]));
-		//System.out.println("\n");
+		if(node.partners.getLength()!=node.pSize)
+		node.partners.addPartner(destination, session);
+		else{
+			session.write("t"+node.port);
+			session.close();
+		}
+		/*
+		else{
+			double rand=Math.random();
+			if(rand<0.25)
+				node.partners.forceAddPartner(destination, session);
+			else{
+				session.write("t"+node.port);
+    			session.close();
+			}
+		}
+		*/
 	}
+	
 	public void terminateConnectionMessage(String msgPart2,IoSession session){
 		int destination=Integer.parseInt(msgPart2);
-		node.deletePartner(destination);
-		//System.out.println("NOODE "+node.port+" DELETED "+destination);
+		node.partners.deletePartner(destination);
 		session.close();
 	}
+	
 	public void sendBandwidth(IoSession session){
 		session.write("n"+node.port+"-"+node.bandwidth);
 	}
+	
 	public void receiveBandwidth(String msgPart2,IoSession session){
 		String []bandwidthParam=msgPart2.split("-");
 		int port=Integer.parseInt(bandwidthParam[0]);
 		int bandwidth=Integer.parseInt(bandwidthParam[1]);
-		node.setBandwidth(port,bandwidth);
+		node.partners.setBandwidth(port,bandwidth);
 	}
 	
 	public void gossipMessage(String msgPart2){
@@ -97,9 +105,10 @@ public class Protocol {
 		int hops=Integer.parseInt(gParam[1]);
 		int originalPort=Integer.parseInt(gParam[0]);
 		node.addMember(originalPort);
-		if(node.getLength(node.pCache)!=node.pSize&&node.getIndex(node.pCache,originalPort)==-1)
+		if(node.partners.getLength()<node.pSize&&node.partners.getIndex(originalPort)==-1){
 			node.connectTo(originalPort);
-    	if(hops>0){
+		}
+		if(hops>0){
     		node.gossip.bridge(originalPort,hops);
     	}
 	}
@@ -108,18 +117,16 @@ public class Protocol {
 		String []bParam=msgPart2.split("-");
 		int src=Integer.parseInt(bParam[1]);
 		int time=Integer.parseInt(bParam[0]);
-		int index=node.getIndex(node.pCache,src);
+		int index=node.partners.getIndex(src);
 		if(index==-1)
 			return;
-		node.BM[index].setBits(bParam[2],time);
+		node.partners.pCache[index].bufferMap.setBits(bParam[2],time);
 		
 		for(int i=0;i<node.pSize;i++){
-			if(node.pCache[i]!=0&&node.BM[i].time!=time)
+			if(node.partners.pCache[i]!=null&&node.partners.pCache[i].bufferMap.time!=time)
 				return;
 		}
 		BitField field=node.scheduler.beginscheduling() ;
-		//System.err.println("&"+field);
-		
 		int diff=(time-node.scheduler.startTime)/1000;
 		for(int i=0;i<node.windowSize;i++){
 			if(diff+i>=node.videoSize)
@@ -129,12 +136,12 @@ public class Protocol {
 			if(field.bits[i]==0)
 				continue;
 			int dest=field.bits[i];
-			int loc=node.getIndex(node.pCache,dest);
+			int loc=node.partners.getIndex(dest);
 			if(loc==-1)
 				continue;
 			int sum=diff+i;
 			//System.err.println("me("+node.port+")sending to ("+node.pCache[loc]+") : x"+sum);
-			node.pSession[loc].write("x"+sum);
+			node.partners.pCache[loc].session.write("x"+sum);
 		}
 	}
 	public void pingMessage(String msgPart2,IoSession session){

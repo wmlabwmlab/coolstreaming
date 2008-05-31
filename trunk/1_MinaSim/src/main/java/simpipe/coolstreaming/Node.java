@@ -15,29 +15,42 @@ public class Node extends IoHandlerAdapter{
 	boolean isSource=false;
 	
 	int dummy=400;
+	
 	//main coolstreaming parameters
+	
 	public final int pSize=4;
+	Partnership partners;
+	
     public final int mSize=20;
     int[] mCache =new int[mSize];
     Timer[] mTimer =new Timer[mSize];
-    int[] pCache =new int[pSize];
-    IoSession pSession[]=new IoSession[pSize];
-    int[] pBandwidth =new int[pSize];
-    int deputyHops=8;
-    int deleteTime=60000;
+    
+    int deputyHops=4;
+    int deleteTime=60000; // time to delete the members from the mCache
+    
+    int continuityIndex;
+    int allIndex; // it is all the segments that I've received (doesnt matter if its deadline came or not when it is received)
+   
+    int bandwidth;
+    final int defaultBandwidth=256;
+    
+//////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\   
     
     //Gossip parameters
     Gossip gossip;
-    int gossipTime=3000;
-    final int hops=4;
+    int gossipTime=6000;
+    final int hops=3;
+    
+//////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\      
     
     //Video parameters
     int windowSize=30;	//30 sec
     int videoSize=500;  //used to be 120sec 
-    BitField BM[]= new BitField[pSize];
     BitField myBuffer;
     Schedule scheduler;
     int exchangeTime=30000;//request map every 5 sec
+    
+//////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\   
     
     //exiperiment limit 
     int gossipNumber;
@@ -45,21 +58,19 @@ public class Node extends IoHandlerAdapter{
     int gossipLimit=4;
     int exchangeLimit=40;//used to be 25
     
-    int continuityIndex;
-    int allIndex;
+//////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\       
     
-    int bandwidth;
-    final int defaultBandwidth=256;
    
     
-    synchronized int getLength(int a[]){ 
+    synchronized int getLength(int a[]){ //utility function to calculate a length of an array 
     	int sum=0;
     	for(int i=0;i<a.length;i++)
     		if(a[i]!=0)
     			sum++;
     	return sum;
     }
-    synchronized int getAnotherDeputy(int destPort){
+    
+    synchronized int getAnotherDeputy(int destPort){ 
     	int[] temp=new int[getLength(mCache)];
     	if(temp.length==0)
     		return destPort;
@@ -74,63 +85,6 @@ public class Node extends IoHandlerAdapter{
     }
     
     
-    
-    synchronized String getPartners(){ //return a set of partners to make the incoming peer connect to them
-    	String candidates="";
-    	for(int i=0;i<pSize-1;i++)
-    		if (pCache[i]!=0)
-    			candidates=candidates+pCache[i]+"-";
-    		
-    	return candidates;	
-    }
-
-    synchronized void addPartner(int port,IoSession session){ //add anew partner to my partner's cache
-    	if(getLength(pCache)==pSize){
-    			session.write("t"+this.port);
-    			session.close();
-    			System.out.println("Me "+this.port+" refusing "+port);
-    			return;
-    		}
-    	if(port>CentralNode.PORT)
-    		port-=CentralNode.PORT;
-    	int index=getIndex(pCache,port);
-    	if(index==-1){
-    		for(int i=0;i<pCache.length;i++)
-    		if(pCache[i]==0){
-    			pCache[i]=port;
-    			pSession[i]=session;
-    			BM[i]=new BitField(windowSize);
-    			pBandwidth[i]=defaultBandwidth;
-    			session.write("m");
-    		    break;
-    		}
-    		addMember(port);
-    	}
-    }
-    synchronized void forceAddPartner(int port,IoSession session){
-    	if(port>CentralNode.PORT)
-    		port-=CentralNode.PORT;
-    	addMember(port);
-    	int rand=(int)Math.round((Math.random()*getLength(pCache)));
-    	if(rand>=pSize)
-    		rand=0;
-    	System.out.println("now I deleted "+pCache[rand]+" and inserted"+port);
-    	pCache[rand]=port;
-    	pSession[rand].write("t"+this.port);
-    	pSession[rand]=session;
-    	BM[rand]=new BitField(windowSize);
-		pBandwidth[rand]=defaultBandwidth;
-		session.write("m");
-    	
-    	
-    }
-    
-    synchronized void setBandwidth(int port, int bandwidth){
-    	int index=getIndex(pCache,port);
-    	if(index!=-1){
-    		pBandwidth[index]=bandwidth;
-    	}
-    }
     
     synchronized void addMember(int port){
     	
@@ -177,7 +131,7 @@ public class Node extends IoHandlerAdapter{
     	}
     }
     
-    int getClosest(int []arr,int basePort,int incomingPort){ //
+    int getClosest(int []arr,int basePort,int incomingPort){ //used to compare which member is the closest to have priority of adding members 
     	int diff=Math.abs(basePort-incomingPort);
     	int index=-1;
     	for(int i=0;i<arr.length;i++)
@@ -189,27 +143,8 @@ public class Node extends IoHandlerAdapter{
     }
 	
     
-    synchronized void deletePartner(int port){
-    	if(port>CentralNode.PORT)
-    		port-=CentralNode.PORT;
-    	for(int i=0;i<pCache.length;i++)
-    		if(pCache[i]==port){
-    			pCache[i]=0;
-    			pSession[i].close();
-    			pBandwidth[i]=0;
-    		}
-    		
-    }
-    synchronized void clearPartners(){
-    	for(int i=0;i<pSize;i++)
-    		if(pSession[i]!=null)
-    		if(pSession[i].isClosing()||!pSession[i].isConnected()){
-    			pSession[i]=null;
-    			pCache[i]=0;
-    			BM[i]=null;
-    			pBandwidth[i]=0;
-    		}
-    }
+    
+    
     synchronized void deleteMember(int port){
     	for(int i=0;i<mCache.length;i++)
     		if(mCache[i]==port){
@@ -224,9 +159,7 @@ public class Node extends IoHandlerAdapter{
     			return;
     		}
     }
-    int getPartner(int i){
-    	return pCache[i];
-    }
+    
     int getMember(int i){
     	return mCache[i];
     }
@@ -236,8 +169,9 @@ public class Node extends IoHandlerAdapter{
     			return i;
     	return -1;
     }
-    IoSession getPartnerSession(int i){
-    	return pSession[i];
+    
+    int getDefaultBandwidth(){
+    	return defaultBandwidth;
     }
 
 }
