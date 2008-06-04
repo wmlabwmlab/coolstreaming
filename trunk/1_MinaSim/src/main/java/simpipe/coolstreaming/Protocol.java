@@ -28,7 +28,14 @@ public class Protocol {
 		int destination=Integer.parseInt(parameters[1]);
 		
 		if(node.partners.getLength()==node.pSize){
-			if(Integer.parseInt(parameters[0])==0){
+			int hops=0;
+			try{
+				hops=Integer.parseInt(parameters[0]);
+			}
+			catch(Exception e){
+				
+			}
+			if(hops==0){
 				node.partners.forceAddPartner(destination,session);
     			node.addMember(destination);
     			String ports=node.partners.getPartners();
@@ -66,11 +73,13 @@ public class Protocol {
 		node.addMember(destination);
 		if(node.partners.getLength()!=node.pSize)
 		node.partners.addPartner(destination, session);
+		/*
 		else{
 			session.write("t"+node.port);
 			session.close();
 		}
-		/*
+		*/
+		
 		else{
 			double rand=Math.random();
 			if(rand<0.25)
@@ -80,7 +89,7 @@ public class Protocol {
     			session.close();
 			}
 		}
-		*/
+		
 	}
 	
 	public void terminateConnectionMessage(String msgPart2,IoSession session){
@@ -122,27 +131,6 @@ public class Protocol {
 			return;
 		node.partners.pCache[index].bufferMap.setBits(bParam[2],time);
 		
-		for(int i=0;i<node.pSize;i++){
-			if(node.partners.pCache[i]!=null&&node.partners.pCache[i].bufferMap.time!=time)
-				return;
-		}
-		BitField field=node.scheduler.beginscheduling() ;
-		int diff=(time-node.scheduler.startTime)/1000;
-		for(int i=0;i<node.windowSize;i++){
-			if(diff+i>=node.videoSize)
-				continue;
-			if(node.scheduler.wholeBits[diff+i]==1)
-				continue;
-			if(field.bits[i]==0)
-				continue;
-			int dest=field.bits[i];
-			int loc=node.partners.getIndex(dest);
-			if(loc==-1)
-				continue;
-			int sum=diff+i;
-			//System.err.println("me("+node.port+")sending to ("+node.pCache[loc]+") : x"+sum);
-			node.partners.pCache[loc].session.write("x"+sum);
-		}
 	}
 	public void pingMessage(String msgPart2,IoSession session){
 		session.write("y"+msgPart2);

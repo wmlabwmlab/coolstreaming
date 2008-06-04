@@ -17,7 +17,7 @@ import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
-public class MembershipVisualization extends JFrame{
+public class PartnershipVisualization extends JFrame{
 	
 	ArrayList<TimeSlot> slots = new ArrayList<TimeSlot>();
 	int index=0;
@@ -80,10 +80,9 @@ public class MembershipVisualization extends JFrame{
 		TimeSlot slot= slots.get(time);
 		final DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 		for(int i=0;i<slot.slots.size();i++){
-			int[] members=slot.slots.get(i).members;
-			for(int j=0;j<members.length;j++)
-				if(members[j]!=0)
-				dataset.addValue(1.0, "Peer "+members[j], ""+slot.slots.get(i).id);
+			int[] bandwidth=slot.slots.get(i).members;
+			if(bandwidth.length!=0)
+			dataset.addValue(bandwidth[0], "--", ""+slot.slots.get(i).id);
 		}
 			
         JFreeChart chart = createChart(dataset,time);
@@ -109,7 +108,7 @@ public class MembershipVisualization extends JFrame{
         
 	}
 	private JFreeChart createChart(final CategoryDataset dataset,int time) {
-
+		
 		int incTime=time+1;
         final JFreeChart chart = ChartFactory.createStackedBarChart(
             title+" at time = "+incTime,  // chart title

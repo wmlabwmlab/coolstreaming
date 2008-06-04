@@ -27,6 +27,7 @@ public class Node extends IoHandlerAdapter{
     
     int deputyHops=4;
     int deleteTime=60000; // time to delete the members from the mCache
+    int bootTime=3000;
     
     int continuityIndex;
     int allIndex; // it is all the segments that I've received (doesnt matter if its deadline came or not when it is received)

@@ -61,7 +61,7 @@ public class Schedule {
 			
 			return bits;
 	}
-	BitField beginscheduling(){
+	BitField beginscheduling(int timeSlot){
 		BitField field = new BitField(node.windowSize);
 		int index=0;
 		int length=0;
@@ -69,6 +69,8 @@ public class Schedule {
 		for(int i=0;i<node.windowSize;i++){
 			for(int j=0;j<node.pSize;j++){
 				if(node.partners.pCache[j]==null)
+					continue;
+				if(timeSlot!=node.partners.pCache[j].bufferMap.time)
 					continue;
 				if(node.partners.pCache[j].bufferMap.bits[i]==1&&isValid(i,timeNow)){
 					length++;
@@ -81,6 +83,8 @@ public class Schedule {
 			Partner supp[]=new Partner[length];
 			for(int k=0;k<node.pSize;k++){
 				if(node.partners.pCache[k]==null)
+					continue;
+				if(timeSlot!=node.partners.pCache[k].bufferMap.time)
 					continue;
 				if(node.partners.pCache[k].bufferMap.bits[i]==1&&isValid(i,timeNow)){
 					supp[index++]=node.partners.pCache[k];

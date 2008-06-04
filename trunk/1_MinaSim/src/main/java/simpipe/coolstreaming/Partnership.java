@@ -80,6 +80,7 @@ public class Partnership {
     	if(pCache[rand]!=null){
     		pCache[rand].session.write("t"+this.port);
     		session.close();
+    		System.out.println("me "+port+" kicked "+pCache[rand].port);
     	}
 		Partner p = new Partner();
 		p.port=port;
@@ -111,9 +112,13 @@ public class Partnership {
     synchronized void clearPartners(){
     	for(int i=0;i<pSize;i++)
     		if(pCache[i]!=null)
-    		if(pCache[i].session!=null)
-    		if(pCache[i].session.isClosing()||!pCache[i].session.isConnected())
+    		if(pCache[i].session!=null){
+    		if(pCache[i].session.isClosing()||!pCache[i].session.isConnected()||pCache[i].port==port)
     			pCache[i]=null;
+    		}
+    		else{
+    			pCache[i]=null;
+    		}
     			
     }
     Partner getPartner(int i){

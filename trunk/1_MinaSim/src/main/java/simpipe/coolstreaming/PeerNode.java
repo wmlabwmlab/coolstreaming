@@ -42,7 +42,9 @@ public class PeerNode extends Node {
 	boolean searching=true;
     boolean bootStraping=true;
     Protocol protocol;
-    
+    Timer boot;
+    int time=0;
+    boolean requesting=false;
     
     PeerNode(boolean source){
     	isSource=source;
@@ -78,13 +80,52 @@ public class PeerNode extends Node {
     	time=Schedule.startTime+(i*1000);
     	break;
     	}
-    	
+    	this.time=time;
+    	requesting=true;
     	for(int i=0;i<pSize;i++)
     		if(partners.pCache[i]!=null){
     		partners.pCache[i].session.write("r"+time);
     		
     		}
     }
+    
+    public void reboot(int dull){ 
+    	if(this.searching){
+    		connectTo(0);	
+    	}
+    	else{
+    		partners.clearPartners();
+    		if(requesting){
+    			requesting=false;
+    			BitField field=scheduler.beginscheduling(time) ;
+    			int diff=(time-scheduler.startTime)/1000;
+    			for(int i=0;i<windowSize;i++){
+    				if(diff+i>=videoSize)
+    					continue;
+    				if(scheduler.wholeBits[diff+i]==1)
+    					continue;
+    				if(field.bits[i]==0)
+    					continue;
+    				int dest=field.bits[i];
+    				int loc=partners.getIndex(dest);
+    				if(loc==-1)
+    					continue;
+    				int sum=diff+i;
+    				//System.err.println("me("+node.port+")sending to ("+node.pCache[loc]+") : x"+sum);
+    				partners.pCache[loc].session.write("x"+sum);
+    			}
+    		}
+    	}
+    	
+    	try{
+			boot=new Timer(bootTime,this,"reboot",0);
+		}
+		catch(Exception e){
+			
+		}
+    }
+    
+    
     
     void beginSceduling(){
     	try{
@@ -117,6 +158,8 @@ public class PeerNode extends Node {
     		config = acceptor.getDefaultConfig();
     		SocketAddress serverAddress = new SimPipeAddress(listenPort);
     		acceptor.bind(serverAddress, this, config); 
+    		boot = new Timer(bootTime,this,"reboot",0);
+    		
     	}
     }
 
@@ -147,20 +190,23 @@ public class PeerNode extends Node {
     public void sessionClosed(IoSession session) {
     	partners.clearPartners();
      }
-
+    
     public void messageReceived(IoSession session, Object message) {
     	//System.err.println("[T="+Scheduler.getInstance().now+"]Peer "+session.getLocalAddress().toString()+" says : \" received from ( "+session.getRemoteAddress().toString()+") : "+ message);
         String msg=(String)message;
         String msgPart2=msg.substring(1);
         
         if(msg.charAt(0)=='d'){ // your deputy is X 
+        	System.out.println("me "+port+" got "+msg+" , remainder"+this.deputyHops);
         	protocol.deputyMessage(msgPart2, session);
         }
         else if(msg.charAt(0)=='c'){ //I want to connect to you , my id is X and I've jumped M times to get to you 
         	protocol.connectMessage(msgPart2, session);
         }
         else if(msg.charAt(0)=='p'){ //I accept you as a partner of mine and you can have another partners which are [A-B-C-....]
-            beginSceduling();
+        	System.out.println("me "+port+" got "+msg+" , remainder"+this.deputyHops);
+        	
+        	beginSceduling();
         	protocol.partnersMessage(msgPart2, session);	
         }
         if(msg.charAt(0)=='a'){ //I am already in the network but I want you to be my friend
