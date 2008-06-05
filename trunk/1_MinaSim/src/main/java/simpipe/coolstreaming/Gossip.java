@@ -8,7 +8,7 @@ import org.apache.mina.common.IoSession;
 /*
 initialized when the partner's cache begins to be filled
 periodically called using function called beginGossip in the PeerNode class
-*/
+**/
 
 public class Gossip { 
 	
