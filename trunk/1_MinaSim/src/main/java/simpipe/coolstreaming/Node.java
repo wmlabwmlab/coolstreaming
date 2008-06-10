@@ -19,6 +19,7 @@ public class Node extends IoHandlerAdapter{
 	//main coolstreaming parameters
 	
 	public final int pSize=4;
+	public int committed=0;
 	Partnership partners;
 	
     public final int mSize=20;
@@ -101,20 +102,17 @@ public class Node extends IoHandlerAdapter{
     	}
     	else{
     		if(getLength(mCache)==mSize){ //the member buffer is full
-    			int i=getClosest(mCache,this.port,port);
-    			if(i==-1){
-    				return;
-    			}
-    			else{
-    				mCache[i]=port;
+    			int i=((int)(Math.random()*mSize))%mSize;
+    			mCache[i]=port;
 	    			try{
+	    				mTimer[i].reset();
 	    				Timer t=new Timer(deleteTime,(Object)this,"delete",port);
 	    				mTimer[i]=t;
 	    			}
 	    			catch (Exception e) {
 					}
     			}
-    			}
+    			
     		else{
     			for(int i=0;i<mCache.length;i++)
     	    		if(mCache[i]==0){
@@ -131,20 +129,6 @@ public class Node extends IoHandlerAdapter{
     		}
     	}
     }
-    
-    int getClosest(int []arr,int basePort,int incomingPort){ //used to compare which member is the closest to have priority of adding members 
-    	int diff=Math.abs(basePort-incomingPort);
-    	int index=-1;
-    	for(int i=0;i<arr.length;i++)
-    		if(Math.abs(arr[i]-basePort)>diff){
-    			index=i;
-    			break; //opto -->replace with incomingPort=arr[i];
-    		}
-    	return index;
-    }
-	
-    
-    
     
     synchronized void deleteMember(int port){
     	for(int i=0;i<mCache.length;i++)

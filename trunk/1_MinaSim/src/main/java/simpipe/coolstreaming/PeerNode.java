@@ -90,7 +90,9 @@ public class PeerNode extends Node {
     }
     
     public void reboot(int dull){ 
-    	if(this.searching){
+    	
+    	if(this.searching||partners.getLength()==0){
+    		this.deputyHops=4;
     		connectTo(0);	
     	}
     	else{
@@ -123,6 +125,7 @@ public class PeerNode extends Node {
 		catch(Exception e){
 			
 		}
+		
     }
     
     
@@ -178,10 +181,11 @@ public class PeerNode extends Node {
 		else{
 			if(partners.getLength()==pSize)
 				return;
-			boolean added=partners.addPartner(Integer.parseInt(session.getRemoteAddress().toString()), session);
-			if(added)
+			//boolean added=partners.addPartner(Integer.parseInt(session.getRemoteAddress().toString()), session);
+			//committed--;
+			//if(added)
 			session.write("a"+this.port);
-			
+			Main.counts++;
 		}
 		
     }
@@ -191,7 +195,7 @@ public class PeerNode extends Node {
     	partners.clearPartners();
      }
     
-    public void messageReceived(IoSession session, Object message) {
+    public synchronized void messageReceived(IoSession session, Object message) {
     	//System.err.println("[T="+Scheduler.getInstance().now+"]Peer "+session.getLocalAddress().toString()+" says : \" received from ( "+session.getRemoteAddress().toString()+") : "+ message);
         String msg=(String)message;
         String msgPart2=msg.substring(1);
@@ -213,9 +217,13 @@ public class PeerNode extends Node {
         	if(partners.getLength()!=pSize)
         		protocol.acceptMessage(msgPart2, session);
         	else{
-        		session.write("t"+this.port);
+        		Main.counts--;
+        		session.write("s"+this.port+"-"+0);
         		session.close();
         	}
+        }
+        if(msg.charAt(0)=='s'){
+        	protocol.confirmAcceptMessage(msgPart2, session);
         }
         else if(msg.charAt(0)=='m'){ //I want from you to send me your bandwidth in order to use it while calculating
         	protocol.sendBandwidth(session);

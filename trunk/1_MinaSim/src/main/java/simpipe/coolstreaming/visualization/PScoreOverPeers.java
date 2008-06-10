@@ -17,7 +17,7 @@ import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
-public class PartnershipVisualization extends JFrame{
+public class PScoreOverPeers extends JFrame{
 	
 	ArrayList<TimeSlot> slots = new ArrayList<TimeSlot>();
 	int index=0;

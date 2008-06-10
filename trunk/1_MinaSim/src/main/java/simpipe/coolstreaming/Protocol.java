@@ -61,25 +61,34 @@ public class Protocol {
 		
 		String []partners=msgPart2.split("-");
 		node.partners.addPartner(Integer.parseInt(partners[0]),session);
+		/*
 		for(int i=1;i<partners.length;i++){
 			node.connectTo(Integer.parseInt(partners[i]));
 		}
-		
+		*/
 	}
 	
 	public void acceptMessage(String msgPart2,IoSession session){
-		
+		Main.counts--;
+		System.err.println("got-1");
 		int destination=Integer.parseInt(msgPart2);
 		node.addMember(destination);
-		if(node.partners.getLength()!=node.pSize)
-		node.partners.addPartner(destination, session);
-		/*
-		else{
-			session.write("t"+node.port);
-			session.close();
+		if(node.partners.getLength()+node.committed<node.pSize&&node.partners.getIndex(destination)==-1)
+		{
+			boolean added=node.partners.addPartner(destination, session);
+			if(added){
+				session.write("s"+node.port+"-"+1);
+				System.err.println("accepted");
+				return;
+			}
 		}
-		*/
-		
+		else{
+			session.write("s"+node.port+"-"+0);
+			System.err.println("rejected");
+			return;
+		}
+		session.write("s"+node.port+"-"+0);
+		/*
 		else{
 			double rand=Math.random();
 			if(rand<0.25)
@@ -89,7 +98,25 @@ public class Protocol {
     			session.close();
 			}
 		}
+		*/
+	}
+	public void confirmAcceptMessage(String msgPart2,IoSession session){
+		String []bandwidthParam=msgPart2.split("-");
+		int port=Integer.parseInt(bandwidthParam[0]);
+		int confirm=Integer.parseInt(bandwidthParam[1]);
 		
+		if(confirm==1)// partnership accepted
+		{
+			node.partners.addPartner(port, session);
+			//System.err.println("new partner ");
+		}
+		else{
+			
+			session.close();
+			node.partners.clearPartners();
+			//System.err.println("nooooo ");
+		}
+		node.committed--;
 	}
 	
 	public void terminateConnectionMessage(String msgPart2,IoSession session){
@@ -110,13 +137,17 @@ public class Protocol {
 	}
 	
 	public void gossipMessage(String msgPart2){
+		//System.err.println("me "+node.port+" got g:"+msgPart2);
 		String []gParam=msgPart2.split("-");
 		int hops=Integer.parseInt(gParam[1]);
 		int originalPort=Integer.parseInt(gParam[0]);
 		node.addMember(originalPort);
-		if(node.partners.getLength()<node.pSize&&node.partners.getIndex(originalPort)==-1){
+		
+		if(node.partners.getLength()+node.committed<node.pSize&&node.partners.getIndex(originalPort)==-1){
 			node.connectTo(originalPort);
+			node.committed++;
 		}
+		
 		if(hops>0){
     		node.gossip.bridge(originalPort,hops);
     	}

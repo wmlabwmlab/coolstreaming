@@ -2,6 +2,7 @@
 package simpipe.coolstreaming;
 
 import java.net.SocketAddress;
+import java.util.Arrays;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -17,9 +18,11 @@ import se.peertv.peertvsim.core.Scheduler;
 import simpipe.SimPipeAcceptor;
 import simpipe.SimPipeAddress;
 import simpipe.SimPipeConnector;
-import simpipe.coolstreaming.visualization.MembersStructure;
-import simpipe.coolstreaming.visualization.MembershipVisualization;
-import simpipe.coolstreaming.visualization.PartnershipVisualization;
+import simpipe.coolstreaming.visualization.DataStructure;
+import simpipe.coolstreaming.visualization.MCacheOverPeers;
+import simpipe.coolstreaming.visualization.PCacheOverPeers;
+import simpipe.coolstreaming.visualization.PScoreOverNetwork;
+import simpipe.coolstreaming.visualization.PScoreOverPeers;
 import simpipe.coolstreaming.visualization.TimeSlot;
 
 
@@ -29,9 +32,12 @@ public class Main extends EventLoop{
 	final static int 		PORT = 30000;
 	SocketAddress serverAddress;
 	static PeerNode client[];
-	MembershipVisualization mVisualization = new MembershipVisualization();
-	PartnershipVisualization pVisualization = new PartnershipVisualization();
+	MCacheOverPeers mVisualization1 = new MCacheOverPeers();
+	PScoreOverPeers pVisualization1 = new PScoreOverPeers();
+	PScoreOverNetwork pVisualization2 = new PScoreOverNetwork();
+	PCacheOverPeers pVisualization3 = new PCacheOverPeers();
 	
+	public static int counts=0;
 	
 	public static void main(String[] args) throws Exception {
 		Main m = new Main();		
@@ -92,9 +98,9 @@ public class Main extends EventLoop{
 			 if(client[i]==null)
 				 continue;
 			 if(!client[i].isSource)
-				 System.out.println("[Peer "+client[i].port+"] : Not source");
+				 System.out.println("[Peer "+client[i].port+"] : Not source "+client[i].committed);
 			 else
-				 System.out.println("[Peer "+client[i].port+"] : Source");
+				 System.out.println("[Peer "+client[i].port+"] : Source"+client[i].committed);
 			 	 
 			 double CI=((double)client[i].continuityIndex)/((double)client[i].allIndex);
 			 System.out.println("continuity index = "+CI);
@@ -113,42 +119,74 @@ public class Main extends EventLoop{
 		 }
 		 
 		 
-		 mVisualization.init();
-		 mVisualization.view(0);
-		 pVisualization.init();
-		 pVisualization.view(0);
-		 
-			
+		 mVisualization1.init();
+		 mVisualization1.view(0);
+		 pVisualization1.init();
+		 pVisualization1.view(0);
+		 pVisualization2.init();
+		 pVisualization2.view(0);
+		 pVisualization3.init();
+		 pVisualization3.view(0);	
+		 System.err.println("---> "+counts);
 	 }
   
 	@Override
 	protected boolean postEventExecution() {
 		// TODO Auto-generated method stub
 		
-		TimeSlot slot=new TimeSlot();
+		TimeSlot mSlot1=new TimeSlot();
+		TimeSlot pSlot1=new TimeSlot();
+		TimeSlot pSlot2 = new TimeSlot();
+		TimeSlot pSlot3 = new TimeSlot();
+		
 		if(Scheduler.getInstance().now%1000==0){
-			//Membership
+			//Membership cache
 			int[]empty={};
 			for(int i=0;i<client.length;i++)
 				if(client[i]!=null)
-				slot.add(new MembersStructure(client[i].mCache,String.valueOf(client[i].port)));
+				mSlot1.add(new DataStructure(client[i].mCache,String.valueOf(client[i].port)));
 				else
-				slot.add(new MembersStructure(empty,String.valueOf(client[i].port)));
-			mVisualization.add(slot);
+				mSlot1.add(new DataStructure(empty,String.valueOf(client[i].port)));
+			mVisualization1.add(mSlot1);
 			
-			//partnership
-			pVisualization.set("Partnership Visualization", "Peers","Partner's Points");
+			
+			//Partnership cache
+			pVisualization3.set("Partner's Cache Visualization", "Peers","Partners");
+			for(int i=0;i<client.length;i++)
+				if(client[i]!=null){
+					int pCache[]=client[i].partners.toArray();
+					pSlot3.add(new DataStructure(pCache,String.valueOf(client[i].port)));
+				}
+				else
+				pSlot3.add(new DataStructure(empty,String.valueOf(client[i].port)));
+			pVisualization3.add(pSlot3);
+			
+			//partnership score over peers
+			pVisualization1.set("Partnership Visualization", "Peers","Partner's Points");
 			
 			for(int i=0;i<client.length;i++)
 				if(client[i]!=null){
 					int sum=bandwidthSum(client[i].partners.pCache);
 					int bandwidth[]={sum};
-					slot.add(new MembersStructure(bandwidth,String.valueOf(client[i].port)));
+					pSlot1.add(new DataStructure(bandwidth,String.valueOf(client[i].port)));
 					
 				}
 				else
-				slot.add(new MembersStructure(empty,String.valueOf(client[i].port)));
-			pVisualization.add(slot);
+				pSlot1.add(new DataStructure(empty,String.valueOf(client[i].port)));
+			pVisualization1.add(pSlot1);
+			
+			//Partnership score over network
+			pVisualization2.set("Partnership Visualization", "Partner's Score","Weight");
+			int scores[] = new int[client.length]; 
+			for(int i=0;i<client.length;i++)
+				if(client[i]!=null){
+					int sum=bandwidthSum(client[i].partners.pCache);
+					scores[i]=sum;
+				}
+			Arrays.sort(scores);
+			pSlot2.add(new DataStructure(scores,""));
+			pVisualization2.add(pSlot2);
+			
 		}
 		
 		return false;

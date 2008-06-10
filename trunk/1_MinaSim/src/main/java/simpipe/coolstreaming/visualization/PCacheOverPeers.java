@@ -17,7 +17,7 @@ import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
-public class MembershipVisualization extends JFrame{
+public class PCacheOverPeers extends JFrame{
 	
 	ArrayList<TimeSlot> slots = new ArrayList<TimeSlot>();
 	int index=0;

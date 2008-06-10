@@ -113,7 +113,7 @@ public class Partnership {
     	for(int i=0;i<pSize;i++)
     		if(pCache[i]!=null)
     		if(pCache[i].session!=null){
-    		if(pCache[i].session.isClosing()||!pCache[i].session.isConnected()||pCache[i].port==port)
+    		if(pCache[i].session.isClosing()||!pCache[i].session.isConnected()||pCache[i].port==port||pCache[i].port==CentralNode.PORT)
     			pCache[i]=null;
     		}
     		else{
@@ -133,6 +133,15 @@ public class Partnership {
     	return -1;
     }
     
+    int[] toArray(){
+    	int[] result = new int[pCache.length];
+    	for(int i=0;i<pCache.length;i++)
+    		if(pCache[i]==null)
+    			result[i]=0;
+    		else
+    			result[i]=pCache[i].port;
+    	return result;
+    }
 	
     
 }
