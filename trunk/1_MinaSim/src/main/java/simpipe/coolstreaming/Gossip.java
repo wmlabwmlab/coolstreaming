@@ -5,6 +5,8 @@ import java.util.Collections;
 
 import org.apache.mina.common.IoSession;
 
+import se.peertv.peertvsim.core.Timer;
+
 /*
 initialized when the partner's cache begins to be filled
 periodically called using function called beginGossip in the PeerNode class
@@ -12,10 +14,14 @@ periodically called using function called beginGossip in the PeerNode class
 
 public class Gossip { 
 	
-	PeerNode node;
-	
+	private PeerNode node;
+    //Gossip parameters
+    private int gossipTime=6000;
+    private final int hops=3;
+    
 	public Gossip(PeerNode node){
 		this.node=node;
+		initiate(0);
 	}
 	
 	/*-this function is used to bridge gossiping message from one node to another
@@ -31,10 +37,15 @@ public class Gossip {
 	/*-this function is used to initiate gossiping (I am the source of gossiping)
 	 * -it is called periodically using the timer fired in the peerNode that alarms that the time has come for gossiping
 	 */
-	void initiate(int hops){
+	public void initiate(int dull){
     	for(int i=0;i<node.pSize;i++)
     		if(node.partners.pCache[i]!=null)
     		sendMessage(node.partners.pCache[i].port,node.port,hops);
+		try {
+			new Timer(gossipTime,this,"initiate",0);
+		} catch (Exception e) {
+		e.printStackTrace();
+		}
 	}
 	
 	/*each of the 2 functions in the class (initiate)&(bridge) must use the function sendmessag() to repopulate the gossip message for other nodes in the network

@@ -18,7 +18,7 @@ import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
-public class PScoreOverNetwork extends JPanel implements Visualization{
+public class ContinuityIndex extends JPanel implements Visualization{
 	
 	ArrayList<TimeSlot> slots = new ArrayList<TimeSlot>();
 	int index=0;

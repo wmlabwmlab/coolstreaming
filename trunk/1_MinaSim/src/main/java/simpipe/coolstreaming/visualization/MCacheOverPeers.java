@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -17,7 +18,7 @@ import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
-public class MCacheOverPeers extends JFrame{
+public class MCacheOverPeers extends JPanel implements Visualization{
 	
 	ArrayList<TimeSlot> slots = new ArrayList<TimeSlot>();
 	int index=0;
@@ -98,7 +99,7 @@ public class MCacheOverPeers extends JFrame{
             
             this.add(chartPanel);
             init=false;
-            this.pack();
+         
            }
         else{
         	chartPanel.setChart(chart);

@@ -12,6 +12,7 @@ public class Partnership {
 	Partner[] pCache ;
     int port;
     int windowSize=0;
+    public int committed=0;
     int defaultBandwidth;
     
     int pSize=0;
@@ -45,26 +46,15 @@ public class Partnership {
     
     // adds partner to the partner's cache
     synchronized boolean addPartner(int port,IoSession session){ //add anew partner to my partner's cache
-    	if(getLength()==pSize){
-    			session.write("t"+this.port);
-    			session.close();
-    			System.out.println("Me "+this.port+" refusing "+port);
-    			return false;
-    		}
-    	if(port>CentralNode.PORT)
-    		port-=CentralNode.PORT;
-    	int index=getIndex(port);
-    	if(index==-1){
+
+    	if(port > Constants.SERVER_PORT)
+    		port -= Constants.SERVER_PORT;
+
+    	if(getLength() + committed < pSize && getIndex(port) == -1){
     		for(int i=0;i<pCache.length;i++)
     		if(pCache[i]==null){
-    			Partner p = new Partner();
-    			p.port=port;
-    			p.session=session;
-    			p.bufferMap=new BitField(windowSize);
-    			p.bandwidth=defaultBandwidth;
-    			session.write("m");
-    			pCache[i]=p;
-    		    return true;
+    			pCache[i]= new Partner(port,defaultBandwidth,session,new BitField(windowSize));
+    			return true;
     		}
     	}
     	return false;
@@ -72,8 +62,8 @@ public class Partnership {
     
     //add partner when it is obligatory to add one (i.e. when the number of remaining hops of the new joining node is zero)
     synchronized void forceAddPartner(int port,IoSession session){
-    	if(port>CentralNode.PORT)
-    		port-=CentralNode.PORT;
+    	if(port > Constants.SERVER_PORT)
+    		port -= Constants.SERVER_PORT;
     	int rand=(int)Math.round((Math.random()*getLength()));
     	if(rand>=pSize)
     		rand=0;
@@ -82,13 +72,7 @@ public class Partnership {
     		session.close();
     		System.out.println("me "+port+" kicked "+pCache[rand].port);
     	}
-		Partner p = new Partner();
-		p.port=port;
-		p.session=session;
-		p.bufferMap=new BitField(windowSize);
-		p.bandwidth=defaultBandwidth;
-		pCache[rand]=p;
-		session.write("m");	
+    	pCache[rand] = new Partner(port,defaultBandwidth,session,new BitField(windowSize));
     }
     
     synchronized void setBandwidth(int port, int bandwidth){
@@ -98,14 +82,13 @@ public class Partnership {
     	}
     }
     synchronized void deletePartner(int port){
-    	if(port>CentralNode.PORT)
-    		port-=CentralNode.PORT;
+    	if(port > Constants.SERVER_PORT)
+    		port -= Constants.SERVER_PORT;
     	int index=getIndex(port);
     	if(index!=-1){
     		pCache[index].session.close();
     		pCache[index]=null;
     	}
-    		
     }
     
     //deletes any partner who has left the network without sending departure message
@@ -113,7 +96,7 @@ public class Partnership {
     	for(int i=0;i<pSize;i++)
     		if(pCache[i]!=null)
     		if(pCache[i].session!=null){
-    		if(pCache[i].session.isClosing()||!pCache[i].session.isConnected()||pCache[i].port==port||pCache[i].port==CentralNode.PORT)
+    		if(pCache[i].session.isClosing()||!pCache[i].session.isConnected()||pCache[i].port==port||pCache[i].port == Constants.SERVER_PORT)
     			pCache[i]=null;
     		}
     		else{
@@ -142,20 +125,4 @@ public class Partnership {
     			result[i]=pCache[i].port;
     	return result;
     }
-	
-    
 }
-
-class Partner{
-	
-	int port;
-	int bandwidth;
-	IoSession session;
-	BitField bufferMap;
-	
-	
-}
-
-
-
-

@@ -47,13 +47,8 @@ public class Main extends EventLoop{
 		BasicConfigurator.configure();
 		Logger.getRootLogger().setLevel(Level.OFF);
 
-		IoHandlerAdapter handler = new CentralNode();
-		IoServiceConfig config;
-		IoAcceptor acceptor;
-		acceptor = new SimPipeAcceptor();
-		config = acceptor.getDefaultConfig();
-		serverAddress = new SimPipeAddress(PORT);
-		acceptor.bind(serverAddress, handler, config);
+		new CentralNode(serverAddress);
+
 				
 	}
 	

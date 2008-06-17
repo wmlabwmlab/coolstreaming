@@ -1,25 +1,25 @@
 package simpipe.coolstreaming;
 
 import se.peertv.peertvsim.core.Scheduler;
+import se.peertv.peertvsim.core.Timer;
 
 /*
  * -This class is designed for scheduling which segment will be fetched from which peer
  * -Also it hold the buffer map for the node initiating this object 
  */
 public class Schedule {
-	Node node;
-	static int startTime;
+	PeerNode node;
+	int startTime;
 	int wholeBits[];
 	int deadLine[];
 	int supplier[];
 	int slack=2;
-	
-	public Schedule(int startTime){
-		this.startTime=startTime;
-	}
-	
-	public Schedule(Node node){
+    int exchangeTime=30000;//request map every 5 sec
+    int timeSlot;
+    
+	public Schedule(PeerNode node, int startTime){
 		this.node=node;
+		this.startTime = startTime;
 		fillDeadLine();
 		wholeBits=new int[node.videoSize];
 		supplier=new int[node.windowSize];
@@ -61,7 +61,32 @@ public class Schedule {
 			
 			return bits;
 	}
-	BitField beginscheduling(int timeSlot){
+	
+	 // the BitMap's timer's firing function 
+    public void exchangeBM(int dull){ 
+    	
+    	int milliesNow=(int)Scheduler.getInstance().now;	
+    	int secondNow=milliesNow/1000;
+    	timeSlot = milliesNow;
+    	for(int i=0;i<node.videoSize;i++)
+	    	if(wholeBits[i]==0&&deadLine[i]<secondNow){
+	    		timeSlot=startTime+(i*1000);
+	    		break;
+	    	}
+    	node.requesting=true;
+    	for(int i=0;i<node.pSize;i++)
+    		if(node.partners.pCache[i]!=null){
+    		node.partners.pCache[i].session.write("r"+timeSlot);
+   		}
+    	
+    	try {
+			new Timer(exchangeTime,this,"exchangeBM",0);
+		} catch (Exception e) {
+		e.printStackTrace();
+		}
+    }
+    
+	BitField beginscheduling(){
 		BitField field = new BitField(node.windowSize);
 		int index=0;
 		int length=0;

@@ -18,53 +18,22 @@
  *  
  */
 package simpipe.coolstreaming;
+import java.net.SocketAddress;
+
+import org.apache.mina.common.IoHandlerAdapter;
 import org.apache.mina.common.IoSession;
 
 import se.peertv.peertvsim.core.Scheduler;
 import se.peertv.peertvsim.core.Timer;
 
-public class CentralNode extends Node {
+public class CentralNode  {
     
-	private final int id = 0;
-    public static int PORT = 30000;
-    boolean firstConn=true;
-    
-    public void delete(int port){
-    	//System.err.println("id("+this.PORT+") : Member("+port+") timeout ");
-    }
-
-    
-    @Override
-	public void sessionCreated(IoSession session) throws Exception {
-    	port=PORT;
-    	System.out.println("Server says : \" new peer number "+session.getRemoteAddress().toString()+" Created !! \"");	
-    }
-
-    public void sessionClosed(IoSession session) {
-       
-    }
-
-    public void messageReceived(IoSession session, Object message) {
-    	String msg=(String)message;
-        String msgPart2=msg.substring(1);
-    	if(msg.charAt(0)=='c'){ //i.e. another client writes to me because he wants to join the network
-    		    int client=Integer.parseInt(session.getRemoteAddress().toString());
-    		    int port=this.getAnotherDeputy(client);
-    			addMember(client);
-    			session.write("d"+port);
-    			
-    	}
-    	
-    }
-
-    public void sessionOpened(IoSession session) {
-	 }
-    
-    public void messageSent(IoSession session, Object message) {
-     }
-
-    public void exceptionCaught(IoSession session, Throwable cause) {
-        cause.printStackTrace();
-        session.close();
+    Membership members;
+    ServerProtocol protocol;
+    private int mSize = 20;
+    int deleteTime=60000; // time to delete the members from the mCache
+    public CentralNode(SocketAddress serverAddress){
+    	protocol = new ServerProtocol(serverAddress,this);
+    	members=new Membership(mSize,Constants.SERVER_PORT,deleteTime);
     }
 }
