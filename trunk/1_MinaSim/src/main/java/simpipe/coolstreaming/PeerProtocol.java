@@ -2,14 +2,11 @@ package simpipe.coolstreaming;
 
 import java.net.SocketAddress;
 
-import org.apache.mina.common.ConnectFuture;
 import org.apache.mina.common.IoAcceptor;
 import org.apache.mina.common.IoHandlerAdapter;
 import org.apache.mina.common.IoServiceConfig;
 import org.apache.mina.common.IoSession;
 import org.apache.mina.common.support.BaseIoConnector;
-
-import com.sun.xml.internal.ws.api.streaming.XMLStreamReaderFactory.Default;
 
 import se.peertv.peertvsim.core.Scheduler;
 import simpipe.SimPipeAcceptor;
@@ -53,11 +50,11 @@ public class PeerProtocol extends IoHandlerAdapter{
 		// is the node still searching for a deputy?
 		if(node.searching){
 			node.deputyHops--;
-			session.write("c"+node.deputyHops+"-"+node.port);
+			session.write(""+Constants.CONNECTION_REQUEST+node.deputyHops+"-"+node.port);
 			return;
 		}
 
-		session.write("a"+node.port);
+		session.write(""+Constants.PARTNERSHIP_REQUEST+node.port);
 		Main.counts++;
 	}
 
@@ -191,7 +188,7 @@ public class PeerProtocol extends IoHandlerAdapter{
 	public void connectMessage(String msgPart2,IoSession session){
 		String []parameters=msgPart2.split(Constants.MESSAGE_SEPARATOR);
 		int destination=Integer.parseInt(parameters[1]);
-		String msg = null;
+
 		if(node.partners.getLength()==node.pSize){
 			int hops=0;
 			try{
@@ -251,7 +248,7 @@ public class PeerProtocol extends IoHandlerAdapter{
 	}
 	
 	public void sendBandwidth(IoSession session){
-		session.write("n"+node.port+"-"+node.bandwidth);
+		session.write(""+Constants.BANDWIDTH_RESPONSE+node.port+"-"+node.bandwidth);
 	}
 	
 	public void receiveBandwidth(String msgPart2,IoSession session){
@@ -282,11 +279,11 @@ public class PeerProtocol extends IoHandlerAdapter{
 		int time=Integer.parseInt(msgPart2);
     	if(node.scheduler!=null){
 		BitField bitField=node.scheduler.getWindow(time);
-    	session.write("b"+time+"-"+node.port+"-"+bitField.toString());
+    	session.write(""+Constants.BUFFERMAP_RESPONSE+time+"-"+node.port+"-"+bitField.toString());
     	}
     	else{
     		BitField zeros = new BitField(node.windowSize);
-    		session.write("b"+time+"-"+node.port+"-"+zeros);
+    		session.write(""+Constants.BUFFERMAP_RESPONSE+time+"-"+node.port+"-"+zeros);
     	}
 	}
 
@@ -302,7 +299,7 @@ public class PeerProtocol extends IoHandlerAdapter{
 	}
 	
 	public void handlePingMessage(String msgPart2,IoSession session){
-		session.write("y"+msgPart2);
+		session.write(""+Constants.SEGMENT_RESPONSE+msgPart2);
 	}
 	
 	public void handlePongMessage(String msgPart2){

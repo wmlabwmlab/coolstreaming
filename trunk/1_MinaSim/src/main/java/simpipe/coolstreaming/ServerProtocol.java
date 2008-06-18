@@ -8,7 +8,6 @@ import org.apache.mina.common.IoServiceConfig;
 import org.apache.mina.common.IoSession;
 
 import simpipe.SimPipeAcceptor;
-import simpipe.SimPipeAddress;
 
 public class ServerProtocol extends IoHandlerAdapter {
 
@@ -37,13 +36,12 @@ public class ServerProtocol extends IoHandlerAdapter {
     }
 
     public void messageReceived(IoSession session, Object message) {
-    	String msg=(String)message;
-        String msgPart2=msg.substring(1);
-    	if(msg.charAt(0)=='c'){ //i.e. another client writes to me because he wants to join the network
+
+    	if(((String)message).charAt(0)== Constants.CONNECTION_REQUEST){ //i.e. another client writes to me because he wants to join the network
     		    int client=Integer.parseInt(session.getRemoteAddress().toString());
     		    int port=node.members.getAnotherDeputy(client);
     			node.members.addMember(client);
-    			session.write("d"+port);
+    			session.write(""+Constants.DEPUTY_MESSAGE+port);
     	}
     }
 

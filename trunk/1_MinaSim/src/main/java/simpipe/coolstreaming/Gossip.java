@@ -1,8 +1,5 @@
 package simpipe.coolstreaming;
 
-import java.util.Arrays;
-import java.util.Collections;
-
 import org.apache.mina.common.IoSession;
 
 import se.peertv.peertvsim.core.Timer;
@@ -55,9 +52,9 @@ public class Gossip {
 		if(destPort==originalPort)
 			return;
 		int index=node.partners.getIndex(destPort);
-		if(index!=-1){ // if there are not any partner with that port number
+		if(index != -1){ // if there are not any partner with that port number
 			IoSession session=node.partners.pCache[index].session;
-			session.write("g"+originalPort+"-"+hops);
+			session.write(""+Constants.GOSSIPING+originalPort+"-"+hops);
 		}
 	}
 }

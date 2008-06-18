@@ -68,7 +68,7 @@ public class Partnership {
     	if(rand>=pSize)
     		rand=0;
     	if(pCache[rand]!=null){
-    		pCache[rand].session.write("t"+this.port);
+    		pCache[rand].session.write(""+Constants.LEAVE_NETWORK+this.port);
     		session.close();
     		System.out.println("me "+port+" kicked "+pCache[rand].port);
     	}

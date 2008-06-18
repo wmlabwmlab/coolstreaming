@@ -16,6 +16,7 @@ public class Schedule {
 	int slack=2;
     int exchangeTime=30000;//request map every 5 sec
     int timeSlot;
+    boolean requesting=false;
     
 	public Schedule(PeerNode node, int startTime){
 		this.node=node;
@@ -73,10 +74,10 @@ public class Schedule {
 	    		timeSlot=startTime+(i*1000);
 	    		break;
 	    	}
-    	node.requesting=true;
+    	requesting=true;
     	for(int i=0;i<node.pSize;i++)
     		if(node.partners.pCache[i]!=null){
-    		node.partners.pCache[i].session.write("r"+timeSlot);
+    		node.partners.pCache[i].session.write(""+Constants.BUFFERMAP_REQUEST+timeSlot);
    		}
     	
     	try {
@@ -167,6 +168,35 @@ public class Schedule {
 			str=str+wholeBits[i];
 		}
 		return str;
+	}
+	public void identifyRequiredSegments() {
+		if(requesting){
+			requesting=false;
+			int diff=(timeSlot - startTime)/1000;
+			
+			// is the movie finished
+			if(diff >= node.videoSize)
+				return;
+			
+			BitField field = beginscheduling();
+			
+			int loc = 0;
+			for(int i=0;i < node.windowSize;i++){
+				// is the movie finished
+				if(diff+i >= node.videoSize)
+					return;
+				
+				if(wholeBits[diff+i]==1 || field.bits[i]==0)
+					continue;
+
+				loc = node.partners.getIndex(field.bits[i]);
+				if(loc==-1)
+					continue;
+				int sum=diff+i;
+				node.partners.pCache[loc].session.write(""+Constants.SEGMENT_REQUEST+sum);
+			}
+		}
+		
 	}
 	
 }
