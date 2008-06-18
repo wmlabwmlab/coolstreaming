@@ -7,17 +7,10 @@ import java.util.Arrays;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.mina.common.ConnectFuture;
-import org.apache.mina.common.IoAcceptor;
-import org.apache.mina.common.IoHandlerAdapter;
-import org.apache.mina.common.IoServiceConfig;
-import org.apache.mina.common.support.BaseIoConnector;
 
 import se.peertv.peertvsim.core.EventLoop;
 import se.peertv.peertvsim.core.Scheduler;
-import simpipe.SimPipeAcceptor;
 import simpipe.SimPipeAddress;
-import simpipe.SimPipeConnector;
 import simpipe.coolstreaming.visualization.ContinuityIndex;
 import simpipe.coolstreaming.visualization.DataStructure;
 import simpipe.coolstreaming.visualization.MCacheOverPeers;
@@ -106,7 +99,7 @@ public class Main extends EventLoop{
 	   		 
 		 }
 		 
-		 ViewApp view = new ViewApp(mCacheOverPeers, pCacheOverPeers,pScoreOverNetwork,pScoreOverPeers);
+		 new ViewApp(mCacheOverPeers, pCacheOverPeers,pScoreOverNetwork,pScoreOverPeers);
 		 mCacheOverPeers.init();
 		 mCacheOverPeers.view(0);
 		 pScoreOverPeers.init();
