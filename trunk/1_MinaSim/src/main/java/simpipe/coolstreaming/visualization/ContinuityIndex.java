@@ -81,11 +81,9 @@ public class ContinuityIndex extends JPanel implements Visualization{
 		TimeSlot slot= slots.get(time);
 		final DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 		for(int i=0;i<slot.slots.size();i++){
-			int[] bandwidth=slot.slots.get(i).members;
-			double size=bandwidth.length;
-			double ratio=1/size;
-			for(int j=0;j<bandwidth.length;j++){
-			dataset.addValue(1,"--",""+slot.slots.get(i).members[j]);
+			double[] CIs=slot.slots.get(i).members;
+			for(int j=0;j<CIs.length;j++){
+			dataset.addValue(slot.slots.get(i).members[j],"--",""+(j+10));
 			}
 		}
 			

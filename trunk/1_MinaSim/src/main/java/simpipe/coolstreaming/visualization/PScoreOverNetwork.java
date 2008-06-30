@@ -81,7 +81,7 @@ public class PScoreOverNetwork extends JPanel implements Visualization{
 		TimeSlot slot= slots.get(time);
 		final DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 		for(int i=0;i<slot.slots.size();i++){
-			int[] bandwidth=slot.slots.get(i).members;
+			double[] bandwidth=slot.slots.get(i).members;
 			double size=bandwidth.length;
 			double ratio=1/size;
 			for(int j=0;j<bandwidth.length;j++){

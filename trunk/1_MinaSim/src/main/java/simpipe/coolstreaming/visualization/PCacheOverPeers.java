@@ -81,7 +81,7 @@ public class PCacheOverPeers extends JPanel implements Visualization{
 		TimeSlot slot= slots.get(time);
 		final DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 		for(int i=0;i<slot.slots.size();i++){
-			int[] members=slot.slots.get(i).members;
+			double[] members=slot.slots.get(i).members;
 			for(int j=0;j<members.length;j++)
 				if(members[j]!=0)
 				dataset.addValue(1.0, "Peer "+members[j], ""+slot.slots.get(i).id);

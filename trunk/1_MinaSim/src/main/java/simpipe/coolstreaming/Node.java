@@ -1,5 +1,7 @@
 package simpipe.coolstreaming;
 
+import simpipe.coolstreaming.interfaces.*;
+
 
 public class Node {
 	
@@ -11,7 +13,7 @@ public class Node {
 	Partnership partners;
     Membership members;
     Gossip gossip;
-    Schedule scheduler;
+    Scheduler scheduler;
     
     //main coolstreaming parameters
 	

@@ -17,6 +17,7 @@ public class PeerProtocol extends IoHandlerAdapter{
 
 	private PeerNode node;
     private boolean bootStraping=true;
+    public int committed=0;
 	
 	public PeerProtocol(SocketAddress serverAddress,PeerNode node){
 		this.node=node;
@@ -55,7 +56,7 @@ public class PeerProtocol extends IoHandlerAdapter{
 		}
 
 		session.write(""+Constants.PARTNERSHIP_REQUEST+node.port);
-		Main.counts++;
+		ControlRoom.counts++;
 	}
 
 	
@@ -144,7 +145,7 @@ public class PeerProtocol extends IoHandlerAdapter{
     }
 
 	private void handlePartnershipRequest(IoSession session, String msgPart2) {
-		Main.counts--;
+		ControlRoom.counts--;
 		int destination = Integer.parseInt(msgPart2);
 		node.members.addMember(destination);
 		boolean added = node.partners.addPartner(destination, session);
@@ -238,7 +239,7 @@ public class PeerProtocol extends IoHandlerAdapter{
 			session.close();
 			node.partners.clearPartners();
 		}
-		node.partners.committed--;
+		committed--;
 	}
 	
 	public void terminateConnection(String msgPart2,IoSession session){
@@ -265,9 +266,9 @@ public class PeerProtocol extends IoHandlerAdapter{
 		int originalPort=Integer.parseInt(gParam[0]);
 		node.members.addMember(originalPort);
 		
-		if(node.partners.getLength()+node.partners.committed < node.pSize&&node.partners.getIndex(originalPort)==-1){
+		if(node.partners.getLength()+committed < node.pSize&&node.partners.getIndex(originalPort)==-1){
 			connectTo(originalPort);
-			node.partners.committed++;
+			committed++;
 		}
 		
 		if(hops>0){
@@ -294,7 +295,7 @@ public class PeerProtocol extends IoHandlerAdapter{
 		int index=node.partners.getIndex(src);
 		if(index==-1)
 			return;
-		node.partners.pCache[index].bufferMap.setBits(bParam[2],time);
+		node.partners.getPartner(index).bufferMap.setBits(bParam[2],time);
 		
 	}
 	
@@ -304,11 +305,11 @@ public class PeerProtocol extends IoHandlerAdapter{
 	
 	public void handlePongMessage(String msgPart2){
 		int index=Integer.parseInt(msgPart2);
-		if(node.scheduler.wholeBits[index]!=1){
+		if(node.scheduler.getWholeBits(index)!=1){
 		node.allIndex++;
-		if(node.scheduler.deadLine[index]<=(Scheduler.getInstance().now/1000))
+		if(node.scheduler.getDeadLine(index)<=(Scheduler.getInstance().now/1000))
 			node.continuityIndex++;
-    	node.scheduler.wholeBits[index]=1;
+    	node.scheduler.setWholeBits(index,1);
 		}
 	}
 }

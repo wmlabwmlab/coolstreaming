@@ -7,18 +7,18 @@ import se.peertv.peertvsim.core.Timer;
  * -This class is designed for scheduling which segment will be fetched from which peer
  * -Also it hold the buffer map for the node initiating this object 
  */
-public class Schedule {
-	PeerNode node;
-	int startTime;
-	int wholeBits[];
-	int deadLine[];
-	int supplier[];
-	int slack=2;
-    int exchangeTime=30000;//request map every 5 sec
-    int timeSlot;
-    boolean requesting=false;
+public class RandomScheduler implements simpipe.coolstreaming.interfaces.Scheduler{
+	private PeerNode node;
+	private int startTime;
+	private int wholeBits[];
+	private int deadLine[];
+	private int supplier[];
+	private int slack=2;
+	private int exchangeTime=30000;//request map every 5 sec
+	private int timeSlot;
+	private boolean requesting=false;
     
-	public Schedule(PeerNode node, int startTime){
+	public RandomScheduler(PeerNode node, int startTime){
 		this.node=node;
 		this.startTime = startTime;
 		fillDeadLine();
@@ -38,12 +38,12 @@ public class Schedule {
 			deadLine[i]=start+i+slack;
 		}
 	}
-	boolean isValid(int index,int timeNow){
+	public boolean isValid(int index,int timeNow){
 		if(deadLine[index]<timeNow)
 			return true;
 		return false;
 	}
-	BitField getWindow(int now){
+	public BitField getWindow(int now){
 			BitField bits = new BitField(node.windowSize);
 			int diff=now-startTime;
 			diff=diff/1000; //conv to sec
@@ -76,8 +76,8 @@ public class Schedule {
 	    	}
     	requesting=true;
     	for(int i=0;i<node.pSize;i++)
-    		if(node.partners.pCache[i]!=null){
-    		node.partners.pCache[i].session.write(""+Constants.BUFFERMAP_REQUEST+timeSlot);
+    		if(node.partners.getPartner(i)!=null){
+    		node.partners.getPartner(i).session.write(""+Constants.BUFFERMAP_REQUEST+timeSlot);
    		}
     	
     	try {
@@ -87,18 +87,18 @@ public class Schedule {
 		}
     }
     
-	BitField beginscheduling(){
+	public BitField beginscheduling(){
 		BitField field = new BitField(node.windowSize);
 		int index=0;
 		int length=0;
 		int timeNow=(int)Scheduler.getInstance().now;
 		for(int i=0;i<node.windowSize;i++){
 			for(int j=0;j<node.pSize;j++){
-				if(node.partners.pCache[j]==null)
+				if(node.partners.getPartner(j)==null)
 					continue;
-				if(timeSlot!=node.partners.pCache[j].bufferMap.time)
+				if(timeSlot!=node.partners.getPartner(j).bufferMap.time)
 					continue;
-				if(node.partners.pCache[j].bufferMap.bits[i]==1&&isValid(i,timeNow)){
+				if(node.partners.getPartner(j).bufferMap.bits[i]==1&&isValid(i,timeNow)){
 					length++;
 				}
 			}
@@ -108,12 +108,12 @@ public class Schedule {
 			index=0;
 			Partner supp[]=new Partner[length];
 			for(int k=0;k<node.pSize;k++){
-				if(node.partners.pCache[k]==null)
+				if(node.partners.getPartner(k)==null)
 					continue;
-				if(timeSlot!=node.partners.pCache[k].bufferMap.time)
+				if(timeSlot!=node.partners.getPartner(k).bufferMap.time)
 					continue;
-				if(node.partners.pCache[k].bufferMap.bits[i]==1&&isValid(i,timeNow)){
-					supp[index++]=node.partners.pCache[k];
+				if(node.partners.getPartner(k).bufferMap.bits[i]==1&&isValid(i,timeNow)){
+					supp[index++]=node.partners.getPartner(k);
 				}
 			}
 			
@@ -127,7 +127,7 @@ public class Schedule {
 			for(int counter=0;counter<length;counter++){
 				int pos=node.partners.getIndex(supp[counter].port);
 				if(pos!=-1)
-				bandwidth[counter]=node.partners.pCache[pos].bandwidth;
+				bandwidth[counter]=node.partners.getPartner(pos).bandwidth;
 				else
 				bandwidth[counter]=node.defaultBandwidth;
 			}
@@ -140,7 +140,7 @@ public class Schedule {
 		return field;
 	}
 	
-	static int pickPeer(int[] bandwidth){
+	public synchronized int pickPeer(int[] bandwidth){
 		int sum=0;
 		double cummulative=0;
 		double ratio[]=new double[bandwidth.length];
@@ -193,10 +193,27 @@ public class Schedule {
 				if(loc==-1)
 					continue;
 				int sum=diff+i;
-				node.partners.pCache[loc].session.write(""+Constants.SEGMENT_REQUEST+sum);
+				node.partners.getPartner(loc).session.write(""+Constants.SEGMENT_REQUEST+sum);
 			}
 		}
 		
 	}
+	public int getWholeBits(int index){
+		return wholeBits[index];
+	}
+	public void setWholeBits(int index, int value){
+		wholeBits[index]=value;
+	}
+	public int getDeadLine(int index){
+		return deadLine[index];
+	}
+	
+	public int getExchangeTime(){
+		return exchangeTime;
+	}
+	public void setStartTime(int start){
+		startTime=start;
+	}
+	
 	
 }

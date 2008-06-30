@@ -1,21 +1,23 @@
 package simpipe.coolstreaming;
 
 import se.peertv.peertvsim.core.Timer;
+import simpipe.coolstreaming.interfaces.Membership;
+import simpipe.coolstreaming.interfaces.Partnership;
 
-public class Membership {
-	Member[] mCache;
+public class RandomMembership implements Membership {
+	private Member[] mCache;
 	int mSize=0;
 	int port;
 	int deleteTime=30000;
 	
-	Membership(int mSize,int port,int deleteTime){
+	RandomMembership(int mSize,int port,int deleteTime){
     	this.port=port;
     	mCache =new Member[mSize];
         this.mSize=mSize;
         this.deleteTime = deleteTime;
     }
 
-	synchronized int getLength(){ 
+	public synchronized int getLength(){ 
     	int sum=0;
     	for(int i=0;i<mCache.length;i++)
     		if(mCache[i]!=null)
@@ -23,7 +25,7 @@ public class Membership {
     	return sum;
     }
 	
-	 int getIndex(int value){
+	public int getIndex(int value){
 	    	for(int i=0;i<mSize;i++)
 	    		if(mCache[i]!=null)
 	    		if(mCache[i].port==value)
@@ -31,7 +33,7 @@ public class Membership {
 	    	return -1;
 	    }
 	
-	 synchronized void addMember(int port){
+	public synchronized void addMember(int port){
  		try{	    	
 	    	int index=getIndex(port);
 	    	if(index!=-1){
@@ -74,7 +76,7 @@ public class Membership {
 	    		}
 	    }
 	 
-	 synchronized int getAnotherDeputy(int destPort){ 
+	public synchronized int getAnotherDeputy(int destPort){ 
 	    	int[] temp=new int[getLength()];
 	    	if(temp.length==0)
 	    		return destPort;
@@ -88,7 +90,7 @@ public class Membership {
 	    	return temp[rand];
 	    }
 	    
-	 int[] toArray(){
+	 public int[] toArray(){
 	    	int[] result = new int[mCache.length];
 	    	for(int i=0;i<mCache.length;i++)
 	    		if(mCache[i]==null)
@@ -97,5 +99,11 @@ public class Membership {
 	    			result[i] = mCache[i].port;
 	    	return result;
 	    }
+	 public Member getMember(int index){
+		 return mCache[index];
+	 }
+	 public void setMember(int index,Member m){
+		 mCache[index]=m;
+	 }
 	
 }

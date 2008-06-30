@@ -2,31 +2,33 @@ package simpipe.coolstreaming;
 
 import org.apache.mina.common.IoSession;
 
+import simpipe.coolstreaming.interfaces.Partnership;
+
 /*
  * this class is responsible for handling all the operations that concerns the partners of each node
  * 
  */
 
-public class Partnership {
+public class RandomPartnership implements Partnership {
 
-	Partner[] pCache ;
+	private Partner[] pCache ;
     int port;
     int windowSize=0;
-    public int committed=0;
     int defaultBandwidth;
-    
+    PeerNode node;
     int pSize=0;
     
-    Partnership(int pSize,int port,int windowSize,int defaultBandwidth){
+    RandomPartnership(int pSize,int port,int windowSize,int defaultBandwidth, PeerNode node ){
     	this.port=port;
     	this.windowSize=windowSize;
     	this.defaultBandwidth=defaultBandwidth;
     	pCache =new Partner[pSize];
         this.pSize=pSize;
+        this.node=node;
     }
     
     //gets the number of partners
-    synchronized int getLength(){ 
+    public synchronized int getLength(){ 
     	int sum=0;
     	for(int i=0;i<pCache.length;i++)
     		if(pCache[i]!=null)
@@ -35,7 +37,7 @@ public class Partnership {
     }
     
     //get random set of partners to be sent to the new joining node
-    synchronized String getPartners(){ //return a set of partners to make the incoming peer connect to them
+    public synchronized String getPartners(){ //return a set of partners to make the incoming peer connect to them
     	String candidates="";
     	for(int i=0;i<pSize-1;i++)
     		if (pCache[i]!=null)
@@ -45,12 +47,12 @@ public class Partnership {
     }
     
     // adds partner to the partner's cache
-    synchronized boolean addPartner(int port,IoSession session){ //add anew partner to my partner's cache
+    public synchronized boolean addPartner(int port,IoSession session){ //add anew partner to my partner's cache
 
     	if(port > Constants.SERVER_PORT)
     		port -= Constants.SERVER_PORT;
 
-    	if(getLength() + committed < pSize && getIndex(port) == -1){
+    	if(getLength() + node.protocol.committed < pSize && getIndex(port) == -1){
     		for(int i=0;i<pCache.length;i++)
     		if(pCache[i]==null){
     			pCache[i]= new Partner(port,defaultBandwidth,session,new BitField(windowSize));
@@ -61,7 +63,7 @@ public class Partnership {
     }
     
     //add partner when it is obligatory to add one (i.e. when the number of remaining hops of the new joining node is zero)
-    synchronized void forceAddPartner(int port,IoSession session){
+    public synchronized void forceAddPartner(int port,IoSession session){
     	if(port > Constants.SERVER_PORT)
     		port -= Constants.SERVER_PORT;
     	int rand=(int)Math.round((Math.random()*getLength()));
@@ -75,13 +77,13 @@ public class Partnership {
     	pCache[rand] = new Partner(port,defaultBandwidth,session,new BitField(windowSize));
     }
     
-    synchronized void setBandwidth(int port, int bandwidth){
+    public synchronized void setBandwidth(int port, int bandwidth){
     	int index=getIndex(port);
     	if(index!=-1){
     		pCache[index].bandwidth=bandwidth;
     	}
     }
-    synchronized void deletePartner(int port){
+    public synchronized void deletePartner(int port){
     	if(port > Constants.SERVER_PORT)
     		port -= Constants.SERVER_PORT;
     	int index=getIndex(port);
@@ -92,7 +94,7 @@ public class Partnership {
     }
     
     //deletes any partner who has left the network without sending departure message
-    synchronized void clearPartners(){
+    public synchronized void clearPartners(){
     	for(int i=0;i<pSize;i++)
     		if(pCache[i]!=null)
     		if(pCache[i].session!=null){
@@ -104,19 +106,25 @@ public class Partnership {
     		}
     			
     }
-    Partner getPartner(int i){
+    public Partner getPartner(int i){
     	return pCache[i];
     }
+    public void setPartner(int index,Partner p){
+    	pCache[index]=p;
+    }
     
-    int getIndex(int value){
+    public int getIndex(int value){
     	for(int i=0;i<pSize;i++)
     		if(pCache[i]!=null)
     		if(pCache[i].port==value)
     			return i;
     	return -1;
     }
+    public Partner[] getCache(){
+    	return pCache;
+    }
     
-    int[] toArray(){
+    public int[] toArray(){
     	int[] result = new int[pCache.length];
     	for(int i=0;i<pCache.length;i++)
     		if(pCache[i]==null)

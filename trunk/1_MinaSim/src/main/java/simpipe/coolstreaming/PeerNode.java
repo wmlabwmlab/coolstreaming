@@ -38,7 +38,7 @@ public class PeerNode extends Node {
     void beginSceduling(){
     	try{
     		if(!isSource){
-    			new Timer(scheduler.exchangeTime,scheduler,"exchangeBM",0);
+    			new Timer(scheduler.getExchangeTime(),scheduler,"exchangeBM",0);
     		}
     	}
 		catch(Exception e){
@@ -48,9 +48,9 @@ public class PeerNode extends Node {
  	public void initalizeNode() throws Exception{
     	
     	//This is the constructor of the PeerNode , its constructor cant be fired when initializing the object , but in stead I waited till first session is created (bootStraping flag) to set some settings
-		members=new Membership(mSize,port,deleteTime);
-		partners=new Partnership(pSize,port,windowSize,defaultBandwidth); 
-		scheduler = new Schedule(this,100);
+		members=new RandomMembership(mSize,port,deleteTime);
+		partners=new RandomPartnership(pSize,port,windowSize,defaultBandwidth,this); 
+		scheduler = new RandomScheduler(this,100);
 		gossip= new Gossip(this);
 		bandwidth=(int)((Math.random()*512)+100);
 		new Timer(bootTime,this,"reboot",0);
