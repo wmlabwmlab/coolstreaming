@@ -37,6 +37,12 @@ public class ContinuityIndex extends JPanel implements Visualization{
 		this.yAxis=yAxis;
 	}
 	
+	@Override
+	public void init(double[] data) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	public void init(){
 		for(int i=0;i<10;i++)
 			slots.add(new TimeSlot());

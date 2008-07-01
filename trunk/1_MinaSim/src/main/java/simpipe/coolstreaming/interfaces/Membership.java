@@ -4,6 +4,7 @@ import simpipe.coolstreaming.Member;
 
 public interface Membership {
 
+	void setParams(int mSize,int port,int deleteTime);
 	int getLength();
 	int getIndex(int value);
 	void addMember(int port);

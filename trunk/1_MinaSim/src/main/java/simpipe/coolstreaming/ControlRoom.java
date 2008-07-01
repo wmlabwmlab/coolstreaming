@@ -14,6 +14,7 @@ import simpipe.SimPipeAddress;
 import simpipe.coolstreaming.visualization.ContinuityIndex;
 import simpipe.coolstreaming.visualization.DataStructure;
 import simpipe.coolstreaming.visualization.MCacheOverPeers;
+import simpipe.coolstreaming.visualization.PAverageOverTime;
 import simpipe.coolstreaming.visualization.PCacheOverPeers;
 import simpipe.coolstreaming.visualization.PScoreOverNetwork;
 import simpipe.coolstreaming.visualization.PScoreOverPeers;
@@ -37,7 +38,7 @@ public class ControlRoom extends EventLoop{
 	PScoreOverNetwork pScoreOverNetwork = new PScoreOverNetwork();
 	PCacheOverPeers pCacheOverPeers = new PCacheOverPeers();
 	ContinuityIndex continuityIndex = new ContinuityIndex();
-	
+	PAverageOverTime pAverageOverTime= new PAverageOverTime();
 	
 	public static int counts=0;
 	
@@ -104,19 +105,32 @@ public class ControlRoom extends EventLoop{
 	   		 
 		 }
 		 
-		 new ViewApp(mCacheOverPeers, pCacheOverPeers,pScoreOverNetwork,pScoreOverPeers,continuityIndex);
+		 new ViewApp(mCacheOverPeers, pCacheOverPeers,pScoreOverNetwork,pScoreOverPeers,continuityIndex,pAverageOverTime);
+		 
 		 mCacheOverPeers.init();
 		 mCacheOverPeers.view(0);
+		 mCacheOverPeers.set("Membership's cache visualization","Peer ID","Number of Members");
+		 
 		 pScoreOverPeers.init();
 		 pScoreOverPeers.view(0);
+		 pScoreOverPeers.set("Score at Each Peer", "Peer ID", "Score");
+		 
 		 pScoreOverNetwork.init();
 		 pScoreOverNetwork.view(0);
+		 pScoreOverNetwork.set("Score Distribution Over Network","Score","Peers Number");
+		 
 		 pCacheOverPeers.init();
 		 pCacheOverPeers.view(0);
+		 pCacheOverPeers.set("Partner's Cache Visualization", "Peers","Number of Partners");
+			
 		 continuityIndex.init();
 		 continuityIndex.view(0);
-		 for(int i=0;i<average.length;i++)
-			 System.out.println(average[i]+" - "+varience[i]);
+		 continuityIndex.set("Continuity Index at Each Peer", "Peer ID", "Continuity Index");
+		 
+		 pAverageOverTime.init(average);
+		 pAverageOverTime.view(0);
+		 pAverageOverTime.set("Average Score Visualization over time", "Time(Sec)", "Average Score");
+		 
 		 System.err.println("---> "+counts);
 	 }
 	 int[]empty={};
@@ -151,7 +165,6 @@ public class ControlRoom extends EventLoop{
 	}
 	void fillPCacheOverPeers(){
 		TimeSlot pSlot3=new TimeSlot();
-		pCacheOverPeers.set("Partner's Cache Visualization", "Peers","Partners");
 		for(int i=0;i<client.length;i++)
 			if(client[i]!=null){
 				int pCache[]=client[i].partners.toArray();

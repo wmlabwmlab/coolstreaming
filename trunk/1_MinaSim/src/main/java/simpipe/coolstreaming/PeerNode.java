@@ -3,6 +3,14 @@ package simpipe.coolstreaming;
 import java.net.SocketAddress;
 import se.peertv.peertvsim.core.Timer;
 
+import simpipe.coolstreaming.interfaces.*;
+
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.io.FileSystemResource;
+
 
 public class PeerNode extends Node {
     
@@ -46,11 +54,26 @@ public class PeerNode extends Node {
     }
     
  	public void initalizeNode() throws Exception{
-    	
-    	//This is the constructor of the PeerNode , its constructor cant be fired when initializing the object , but in stead I waited till first session is created (bootStraping flag) to set some settings
-		members=new RandomMembership(mSize,port,deleteTime);
-		partners=new RandomPartnership(pSize,port,windowSize,defaultBandwidth,this); 
-		scheduler = new RandomScheduler(this,100);
+    
+ 		//wiring objects using spring
+ 		try{
+ 			 
+ 			 BeanFactory factory = new XmlBeanFactory(new FileSystemResource("src/main/java/simpipe/coolstreaming/resources/beans.xml"));
+ 			 Package p = (Package)factory.getBean("app_bean");	
+ 			 members=p.getMembers();
+ 	 		 partners=p.getPartners();
+ 	 		 scheduler=p.getScheduler();
+ 	 		 members.setParams(mSize,port,deleteTime);
+ 	 		 partners.setParams(pSize,port,windowSize,defaultBandwidth,this);
+ 	 		 scheduler.setParams(this,100);
+ 			
+ 		 }
+ 		 catch(Exception e){
+ 			 System.out.println("Error Parsing File");
+ 			 e.printStackTrace();
+ 			 
+ 		 }
+ 		
 		gossip= new Gossip(this);
 		bandwidth=(int)((Math.random()*512)+100);
 		new Timer(bootTime,this,"reboot",0);
@@ -59,4 +82,7 @@ public class PeerNode extends Node {
     public void sessionClosed() {
     	partners.clearPartners();
      }
+    
+    
+    
  }

@@ -39,4 +39,6 @@ public class Node {
     int exchangeNumber;
     int gossipLimit=4;
     int exchangeLimit=40;//used to be 25
+    
+   
 }

@@ -10,13 +10,25 @@ public class RandomMembership implements Membership {
 	int port;
 	int deleteTime=30000;
 	
+	public RandomMembership() {
+		
+	}
 	RandomMembership(int mSize,int port,int deleteTime){
     	this.port=port;
     	mCache =new Member[mSize];
         this.mSize=mSize;
         this.deleteTime = deleteTime;
     }
-
+	
+	@Override
+	public void setParams(int mSize, int port, int deleteTime) {
+		// TODO Auto-generated method stub
+		this.port=port;
+    	mCache =new Member[mSize];
+        this.mSize=mSize;
+        this.deleteTime = deleteTime;
+	}
+	@Override
 	public synchronized int getLength(){ 
     	int sum=0;
     	for(int i=0;i<mCache.length;i++)
@@ -25,14 +37,16 @@ public class RandomMembership implements Membership {
     	return sum;
     }
 	
+	@Override	
 	public int getIndex(int value){
 	    	for(int i=0;i<mSize;i++)
 	    		if(mCache[i]!=null)
 	    		if(mCache[i].port==value)
 	    			return i;
 	    	return -1;
-	    }
+	}
 	
+	@Override	
 	public synchronized void addMember(int port){
  		try{	    	
 	    	int index=getIndex(port);
@@ -61,7 +75,8 @@ public class RandomMembership implements Membership {
 		}
 	  }
 	 
-	 public synchronized void deleteMember(int port){
+	@Override	 
+	public synchronized void deleteMember(int port){
 	    	for(int i=0;i<mCache.length;i++)
 	    		if(mCache[i]!=null)
 	    		if(mCache[i].port==port){
@@ -76,6 +91,7 @@ public class RandomMembership implements Membership {
 	    		}
 	    }
 	 
+	@Override
 	public synchronized int getAnotherDeputy(int destPort){ 
 	    	int[] temp=new int[getLength()];
 	    	if(temp.length==0)
@@ -90,7 +106,8 @@ public class RandomMembership implements Membership {
 	    	return temp[rand];
 	    }
 	    
-	 public int[] toArray(){
+	@Override
+	public int[] toArray(){
 	    	int[] result = new int[mCache.length];
 	    	for(int i=0;i<mCache.length;i++)
 	    		if(mCache[i]==null)
@@ -99,10 +116,14 @@ public class RandomMembership implements Membership {
 	    			result[i] = mCache[i].port;
 	    	return result;
 	    }
-	 public Member getMember(int index){
+	
+	@Override 
+	public Member getMember(int index){
 		 return mCache[index];
 	 }
-	 public void setMember(int index,Member m){
+	
+	@Override
+	public void setMember(int index,Member m){
 		 mCache[index]=m;
 	 }
 	

@@ -8,6 +8,8 @@ import se.peertv.peertvsim.core.Timer;
  * -Also it hold the buffer map for the node initiating this object 
  */
 public class RandomScheduler implements simpipe.coolstreaming.interfaces.Scheduler{
+	
+	
 	private PeerNode node;
 	private int startTime;
 	private int wholeBits[];
@@ -18,6 +20,9 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 	private int timeSlot;
 	private boolean requesting=false;
     
+	public RandomScheduler(){
+		
+	}
 	public RandomScheduler(PeerNode node, int startTime){
 		this.node=node;
 		this.startTime = startTime;
@@ -31,6 +36,24 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 			}
 		}
 	}
+	
+	@Override
+	public void setParams(PeerNode node, int startTime) {
+		this.node=node;
+		this.startTime = startTime;
+		fillDeadLine();
+		wholeBits=new int[node.videoSize];
+		supplier=new int[node.windowSize];
+		if(node.isSource)
+		{
+			for(int i=0;i<node.videoSize;i++){
+				wholeBits[i]=1;
+			}
+		}
+		
+	}
+	
+	@Override
 	public void fillDeadLine(){
 		deadLine=new int[node.videoSize];
 		int start=startTime/1000;	//in seconds
@@ -38,11 +61,15 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 			deadLine[i]=start+i+slack;
 		}
 	}
+	
+	@Override
 	public boolean isValid(int index,int timeNow){
 		if(deadLine[index]<timeNow)
 			return true;
 		return false;
 	}
+	
+	@Override
 	public BitField getWindow(int now){
 			BitField bits = new BitField(node.windowSize);
 			int diff=now-startTime;
@@ -64,6 +91,7 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 	}
 	
 	 // the BitMap's timer's firing function 
+	@Override
     public void exchangeBM(int dull){ 
     	
     	int milliesNow=(int)Scheduler.getInstance().now;	
@@ -87,6 +115,7 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 		}
     }
     
+	@Override
 	public BitField beginscheduling(){
 		BitField field = new BitField(node.windowSize);
 		int index=0;
@@ -140,6 +169,7 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 		return field;
 	}
 	
+	@Override
 	public synchronized int pickPeer(int[] bandwidth){
 		int sum=0;
 		double cummulative=0;
@@ -162,6 +192,7 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 		return 0;
 	}
 	
+	@Override
 	public String toString(){
 		String str="";
 		for(int i=0;i<wholeBits.length;i++){
@@ -169,6 +200,8 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 		}
 		return str;
 	}
+	
+	@Override
 	public void identifyRequiredSegments() {
 		if(requesting){
 			requesting=false;
@@ -198,19 +231,28 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 		}
 		
 	}
+	
+	@Override
 	public int getWholeBits(int index){
 		return wholeBits[index];
 	}
+	
+	@Override
 	public void setWholeBits(int index, int value){
 		wholeBits[index]=value;
 	}
+	
+	@Override
 	public int getDeadLine(int index){
 		return deadLine[index];
 	}
 	
+	@Override
 	public int getExchangeTime(){
 		return exchangeTime;
 	}
+	
+	@Override
 	public void setStartTime(int start){
 		startTime=start;
 	}

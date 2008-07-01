@@ -12,11 +12,12 @@ public class ViewApp extends JFrame{
     private PScoreOverNetwork pScoreOverNetwork;
     private PScoreOverPeers pScoreOverPeers;
     private ContinuityIndex continuityIndex;
+    private PAverageOverTime pAverageOverTime; 
     
 	
-	public ViewApp(MCacheOverPeers mCacheOverPeers,PCacheOverPeers pCacheOverPeers,PScoreOverNetwork pScoreOverNetwork,PScoreOverPeers pScoreOverPeers,ContinuityIndex continuityIndex) {
+	public ViewApp(MCacheOverPeers mCacheOverPeers,PCacheOverPeers pCacheOverPeers,PScoreOverNetwork pScoreOverNetwork,PScoreOverPeers pScoreOverPeers,ContinuityIndex continuityIndex,PAverageOverTime pAverageOverTime) {
 		
-		setPanels(mCacheOverPeers, pCacheOverPeers, pScoreOverNetwork, pScoreOverPeers,continuityIndex);
+		setPanels(mCacheOverPeers, pCacheOverPeers, pScoreOverNetwork, pScoreOverPeers,continuityIndex,pAverageOverTime);
 		this.setBounds(100,100,600,550);
 		this.add(tab,null);
 		tab.addTab("Member's cache at each peer",mCacheOverPeers);
@@ -24,11 +25,11 @@ public class ViewApp extends JFrame{
 		tab.addTab("Partnership's score over network",pScoreOverNetwork);
 		tab.addTab("Partnership's score at each peer",pScoreOverPeers);
 		tab.addTab("Continuity Index",continuityIndex);
-		
+		tab.addTab("Average Scores Over Time",pAverageOverTime);
 		this.setVisible(true);
 	}
 	
-	void setPanels(MCacheOverPeers mCacheOverPeers,PCacheOverPeers pCacheOverPeers,PScoreOverNetwork pScoreOverNetwork,PScoreOverPeers pScoreOverPeers,ContinuityIndex continuityIndex){
+	void setPanels(MCacheOverPeers mCacheOverPeers,PCacheOverPeers pCacheOverPeers,PScoreOverNetwork pScoreOverNetwork,PScoreOverPeers pScoreOverPeers,ContinuityIndex continuityIndex,PAverageOverTime pAverageOverTime){
     	this.mCacheOverPeers=mCacheOverPeers;
     	this.pCacheOverPeers=pCacheOverPeers;
     	this.pScoreOverPeers=pScoreOverPeers;
