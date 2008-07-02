@@ -2,7 +2,6 @@ package simpipe.coolstreaming;
 
 import se.peertv.peertvsim.core.Timer;
 import simpipe.coolstreaming.interfaces.Membership;
-import simpipe.coolstreaming.interfaces.Partnership;
 
 public class RandomMembership implements Membership {
 	private Member[] mCache;
