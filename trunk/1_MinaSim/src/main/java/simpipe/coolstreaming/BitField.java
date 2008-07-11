@@ -1,5 +1,5 @@
 package simpipe.coolstreaming;
-
+import java.util.ArrayList;
 /*
  * A data structure for holding the bits of the buffered map (Array of bits and some operations for handling it)
  */
@@ -8,8 +8,12 @@ public class BitField {
 
 	int bits[] ;
 	int time;
+	ArrayList<Integer> a1 =new ArrayList<Integer>();
+	ArrayList<Integer> a2 =new ArrayList<Integer>();
+	
 	public BitField(int size){
 		bits  = new int[size];
+		
 	}
 	void fill(int i){
 		bits[i]=1;
