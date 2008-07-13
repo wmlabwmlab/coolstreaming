@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 /*
  * -This class is designed for scheduling which segment will be fetched from which partner
- * using the CoolStreaming (paper) algorithm
+ * using the CoolStreaming (paper) algorithm without the "Transfer Time" optimization
  * -Also it holds the buffer map for the node initiating this object 
  */
 public class CoolStreamingScheduler implements simpipe.coolstreaming.interfaces.Scheduler {
@@ -46,7 +46,7 @@ public class CoolStreamingScheduler implements simpipe.coolstreaming.interfaces.
 		ArrayList<Integer> tempSupplierSet [] =new ArrayList[node.windowSize];
 		int timeNow=(int)Scheduler.getInstance().now;
 		BitField window=new BitField(node.windowSize);
-		window=getWindow(timeNow); // not efficient, better to be stored but i don't know where it is stored! 
+		window=getWindow(timeSlot); 
 		for (int n=1;n<=node.pSize;n++){
 			dupSet[n]=new ArrayList();
 		}
@@ -94,7 +94,7 @@ public class CoolStreamingScheduler implements simpipe.coolstreaming.interfaces.
 	@Override
 	public void exchangeBM(int dull) {
 		int milliesNow=(int)Scheduler.getInstance().now;	
-    	int secondNow=milliesNow/1000;
+    //	int secondNow=milliesNow/1000;
     	timeSlot = milliesNow;
     	/*for(int i=0;i<node.videoSize;i++)
 	    	if(wholeBits[i]==0&&deadLine[i]<secondNow){
@@ -120,7 +120,7 @@ public class CoolStreamingScheduler implements simpipe.coolstreaming.interfaces.
 		int diff=now-startTime;
 		diff=diff/1000; //conv to sec
 		int j=0;
-		for(int i=(diff / 30)*30;i<node.windowSize+((diff / 30)*30);i++){
+		for(int i=(diff / node.windowSize)* node.windowSize;i<node.windowSize+((diff / node.windowSize)* node.windowSize);i++){
 			if(j==node.windowSize)
 				break;
 			if(i<node.videoSize)
