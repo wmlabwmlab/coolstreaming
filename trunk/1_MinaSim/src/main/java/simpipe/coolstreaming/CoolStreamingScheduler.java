@@ -157,8 +157,8 @@ public class CoolStreamingScheduler implements simpipe.coolstreaming.interfaces.
 				loc = node.partners.getIndex(field.a2.get(i));
 				if(loc==-1)
 					continue;
-				//int sum=diff+i;
-				node.partners.getPartner(loc).session.write(""+Constants.SEGMENT_REQUEST+field.a1.get(i));
+				int sum=field.a1.get(i)+(diff / node.windowSize)*node.windowSize;
+				node.partners.getPartner(loc).session.write(""+Constants.SEGMENT_REQUEST+sum);
 			}
 		}
 		
