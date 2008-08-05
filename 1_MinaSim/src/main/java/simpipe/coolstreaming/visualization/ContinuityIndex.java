@@ -18,7 +18,7 @@ import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
-public class ContinuityIndex extends JPanel implements Visualization{
+public class ContinuityIndex extends Visualization{
 	
 	ArrayList<TimeSlot> slots = new ArrayList<TimeSlot>();
 	int index=0;
@@ -35,6 +35,16 @@ public class ContinuityIndex extends JPanel implements Visualization{
 		this.title=title;
 		this.xAxis=xAxis;
 		this.yAxis=yAxis;
+	}
+	
+	@Override
+	public boolean isDependent() {
+		return false;
+	}
+	
+	@Override
+	public String getTitle() {
+		return title;
 	}
 	
 	@Override

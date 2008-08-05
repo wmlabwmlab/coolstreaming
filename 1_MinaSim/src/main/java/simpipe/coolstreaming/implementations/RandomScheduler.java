@@ -1,7 +1,10 @@
-package simpipe.coolstreaming;
+package simpipe.coolstreaming.implementations;
 
 import se.peertv.peertvsim.core.Scheduler;
 import se.peertv.peertvsim.core.Timer;
+import simpipe.coolstreaming.BitField;
+import simpipe.coolstreaming.Constants;
+import simpipe.coolstreaming.PeerNode;
 
 /*
  * -This class is designed for scheduling which segment will be fetched from which peer

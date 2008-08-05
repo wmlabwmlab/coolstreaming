@@ -2,8 +2,8 @@ package simpipe.coolstreaming.interfaces;
 
 import org.apache.mina.common.IoSession;
 
-import simpipe.coolstreaming.Partner;
 import simpipe.coolstreaming.PeerNode;
+import simpipe.coolstreaming.implementations.Partner;
 
 public interface Partnership {
 

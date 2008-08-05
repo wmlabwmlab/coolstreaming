@@ -1,8 +1,12 @@
-package simpipe.coolstreaming;
+package simpipe.coolstreaming.implementations;
 
 import se.peertv.peertvsim.core.Timer;
 //import simpipe.coolstreaming.interfaces.Scheduler;
 import se.peertv.peertvsim.core.Scheduler;
+import simpipe.coolstreaming.BitField;
+import simpipe.coolstreaming.Constants;
+import simpipe.coolstreaming.PeerNode;
+
 import java.util.ArrayList;
 
 /*

@@ -85,6 +85,7 @@ public class PeerProtocol extends IoHandlerAdapter{
 	       	//I accept you as a partner of mine and you can have another partners which are [A-B-C-....]        	
 	        case Constants.PARTNERSHIP_ACCEPTANCE :
 	        	System.out.println("me "+node.port+" got "+msg+" , remainder"+node.deputyHops);
+	        	node.joinTime=(int)Scheduler.getInstance().now;
 	        	node.beginSceduling();
 	        	partnersMessage(msgPart2, session);	
 	        	break;
@@ -182,6 +183,7 @@ public class PeerProtocol extends IoHandlerAdapter{
 		}
     	else {
 			node.beginSceduling();
+			node.joinTime=(int)Scheduler.getInstance().now;
 			node.searching=false;
 		}
 	}
@@ -295,7 +297,7 @@ public class PeerProtocol extends IoHandlerAdapter{
 		int index=node.partners.getIndex(src);
 		if(index==-1)
 			return;
-		node.partners.getPartner(index).bufferMap.setBits(bParam[2],time);
+		node.partners.getPartner(index).getBufferMap().setBits(bParam[2],time);
 		
 	}
 	
@@ -305,11 +307,12 @@ public class PeerProtocol extends IoHandlerAdapter{
 	
 	public void handlePongMessage(String msgPart2){
 		int index=Integer.parseInt(msgPart2);
+		
 		if(node.scheduler.getWholeBits(index)!=1){
-		node.allIndex++;
 		if(node.scheduler.getDeadLine(index)<=(Scheduler.getInstance().now/1000))
 			node.continuityIndex++;
     	node.scheduler.setWholeBits(index,1);
 		}
 	}
+	
 }

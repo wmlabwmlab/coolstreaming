@@ -2,6 +2,8 @@ package simpipe.coolstreaming;
 
 import java.net.SocketAddress;
 
+import simpipe.coolstreaming.implementations.RandomMembership;
+
 public class CentralNode  {
     
     RandomMembership members;

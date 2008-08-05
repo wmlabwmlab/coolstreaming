@@ -1,4 +1,4 @@
-package simpipe.coolstreaming;
+package simpipe.coolstreaming.implementations;
 
 import se.peertv.peertvsim.core.Timer;
 import simpipe.coolstreaming.interfaces.Membership;
@@ -12,7 +12,7 @@ public class RandomMembership implements Membership {
 	public RandomMembership() {
 		
 	}
-	RandomMembership(int mSize,int port,int deleteTime){
+	public RandomMembership(int mSize,int port,int deleteTime){
     	this.port=port;
     	mCache =new Member[mSize];
         this.mSize=mSize;

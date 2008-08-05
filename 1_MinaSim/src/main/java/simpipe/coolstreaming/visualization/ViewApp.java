@@ -7,33 +7,21 @@ import javax.swing.JTabbedPane;
 public class ViewApp extends JFrame{
 	
 	JTabbedPane tab = new JTabbedPane();
-	private MCacheOverPeers mCacheOverPeers;
-    private PCacheOverPeers pCacheOverPeers;
-    private PScoreOverNetwork pScoreOverNetwork;
-    private PScoreOverPeers pScoreOverPeers;
-    private ContinuityIndex continuityIndex;
-    private PAverageOverTime pAverageOverTime; 
+	private Visualization visual[];
     
 	
-	public ViewApp(MCacheOverPeers mCacheOverPeers,PCacheOverPeers pCacheOverPeers,PScoreOverNetwork pScoreOverNetwork,PScoreOverPeers pScoreOverPeers,ContinuityIndex continuityIndex,PAverageOverTime pAverageOverTime) {
+	public ViewApp(Visualization visual[]) {
 		
-		setPanels(mCacheOverPeers, pCacheOverPeers, pScoreOverNetwork, pScoreOverPeers,continuityIndex,pAverageOverTime);
+		setPanels(visual);
 		this.setBounds(100,100,600,550);
 		this.add(tab,null);
-		tab.addTab("Member's cache at each peer",mCacheOverPeers);
-		tab.addTab("Partner's cache at each peer",pCacheOverPeers);
-		tab.addTab("Partnership's score over network",pScoreOverNetwork);
-		tab.addTab("Partnership's score at each peer",pScoreOverPeers);
-		tab.addTab("Continuity Index",continuityIndex);
-		tab.addTab("Average Scores Over Time",pAverageOverTime);
+		for(int i=0;i<visual.length;i++)
+		tab.addTab(visual[i].getTitle(),visual[i]);
+		
 		this.setVisible(true);
 	}
 	
-	void setPanels(MCacheOverPeers mCacheOverPeers,PCacheOverPeers pCacheOverPeers,PScoreOverNetwork pScoreOverNetwork,PScoreOverPeers pScoreOverPeers,ContinuityIndex continuityIndex,PAverageOverTime pAverageOverTime){
-    	this.mCacheOverPeers=mCacheOverPeers;
-    	this.pCacheOverPeers=pCacheOverPeers;
-    	this.pScoreOverPeers=pScoreOverPeers;
-    	this.pScoreOverNetwork=pScoreOverNetwork;
-    	this.continuityIndex=continuityIndex;
+	void setPanels(Visualization visual[]){
+    	this.visual=visual;
     }
 }
