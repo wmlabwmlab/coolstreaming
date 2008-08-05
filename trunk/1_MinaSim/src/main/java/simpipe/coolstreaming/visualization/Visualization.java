@@ -1,10 +1,14 @@
 package simpipe.coolstreaming.visualization;
 
-public interface Visualization {
+import javax.swing.JPanel;
 
-	public void set(String title,String xAxis, String yAxis);
-	public void init();
-	public void init(double[] data);
-	public void add(TimeSlot t);
-	public void view(int time);
+public abstract class Visualization extends JPanel {
+
+	public abstract void set(String title,String xAxis, String yAxis);
+	public abstract void init();
+	public abstract void init(double[] data);
+	public abstract void add(TimeSlot t);
+	public abstract void view(int time);
+	public abstract String getTitle();
+	public abstract boolean isDependent();
 }

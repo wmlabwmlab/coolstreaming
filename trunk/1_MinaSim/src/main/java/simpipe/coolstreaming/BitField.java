@@ -6,28 +6,28 @@ import java.util.ArrayList;
 
 public class BitField {
 
-	int bits[] ;
-	int time;
-	ArrayList<Integer> a1 =new ArrayList<Integer>();
-	ArrayList<Integer> a2 =new ArrayList<Integer>();
+	public int bits[] ;
+	public int time;
+	public ArrayList<Integer> a1 =new ArrayList<Integer>();
+	public ArrayList<Integer> a2 =new ArrayList<Integer>();
 	
 	public BitField(int size){
 		bits  = new int[size];
 		
 	}
-	void fill(int i){
+	public void fill(int i){
 		bits[i]=1;
 	}
-	void empty(int i){
+	public void empty(int i){
 		bits[i]=0;
 	}
-	int length(){
+	public int length(){
 		return bits.length;
 	}
-	void setBit(int index,int value){
+	public void setBit(int index,int value){
 		bits[index]=value;
 	}
-	void setBits(String s,int time){
+	public void setBits(String s,int time){
 		this.time=time;
 		for(int i=0;i<s.length();i++)
 		{

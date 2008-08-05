@@ -1,6 +1,6 @@
 package simpipe.coolstreaming.interfaces;
 
-import simpipe.coolstreaming.Member;
+import simpipe.coolstreaming.implementations.Member;
 
 public interface Membership {
 

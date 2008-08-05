@@ -1,7 +1,10 @@
-package simpipe.coolstreaming;
+package simpipe.coolstreaming.implementations;
 
 import org.apache.mina.common.IoSession;
 
+import simpipe.coolstreaming.BitField;
+import simpipe.coolstreaming.Constants;
+import simpipe.coolstreaming.PeerNode;
 import simpipe.coolstreaming.interfaces.Partnership;
 
 /*

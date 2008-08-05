@@ -1,4 +1,4 @@
-package simpipe.coolstreaming;
+package simpipe.coolstreaming.implementations;
 
 import se.peertv.peertvsim.core.Timer;
 

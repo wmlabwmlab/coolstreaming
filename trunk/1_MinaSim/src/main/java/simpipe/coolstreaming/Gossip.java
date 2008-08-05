@@ -27,7 +27,7 @@ public class Gossip {
 	void bridge(int port,int hops){
 		for(int i=0;i<node.pSize;i++)
     		if(node.partners.getPartner(i)!=null){
-    		sendMessage(node.partners.getPartner(i).port,port,hops-1);
+    		sendMessage(node.partners.getPartner(i).getPort(),port,hops-1);
     		}
     }
 	
@@ -37,7 +37,7 @@ public class Gossip {
 	public void initiate(int dull){
     	for(int i=0;i<node.pSize;i++)
     		if(node.partners.getPartner(i)!=null)
-    		sendMessage(node.partners.getPartner(i).port,node.port,hops);
+    		sendMessage(node.partners.getPartner(i).getPort(),node.port,hops);
 		try {
 			new Timer(gossipTime,this,"initiate",0);
 		} catch (Exception e) {
@@ -53,7 +53,7 @@ public class Gossip {
 			return;
 		int index=node.partners.getIndex(destPort);
 		if(index != -1){ // if there are not any partner with that port number
-			IoSession session=node.partners.getPartner(index).session;
+			IoSession session=node.partners.getPartner(index).getSession();
 			session.write(""+Constants.GOSSIPING+originalPort+"-"+hops);
 		}
 	}

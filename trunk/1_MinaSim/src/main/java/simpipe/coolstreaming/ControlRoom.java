@@ -4,6 +4,8 @@ package simpipe.coolstreaming;
 import java.net.SocketAddress;
 import java.util.Arrays;
 
+import javax.swing.plaf.basic.BasicScrollPaneUI.VSBChangeListener;
+
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -11,6 +13,7 @@ import org.apache.log4j.Logger;
 import se.peertv.peertvsim.core.EventLoop;
 import se.peertv.peertvsim.core.Scheduler;
 import simpipe.SimPipeAddress;
+import simpipe.coolstreaming.implementations.Partner;
 import simpipe.coolstreaming.visualization.ContinuityIndex;
 import simpipe.coolstreaming.visualization.DataStructure;
 import simpipe.coolstreaming.visualization.MCacheOverPeers;
@@ -20,6 +23,8 @@ import simpipe.coolstreaming.visualization.PScoreOverNetwork;
 import simpipe.coolstreaming.visualization.PScoreOverPeers;
 import simpipe.coolstreaming.visualization.TimeSlot;
 import simpipe.coolstreaming.visualization.ViewApp;
+import simpipe.coolstreaming.visualization.Visualization;
+
 import org.apache.commons.math.stat.*;
 
 
@@ -33,12 +38,8 @@ public class ControlRoom extends EventLoop{
 	final static boolean 	SIM_MODE = true;
 	SocketAddress serverAddress;
 	static PeerNode client[];
-	MCacheOverPeers mCacheOverPeers = new MCacheOverPeers();
-	PScoreOverPeers pScoreOverPeers = new PScoreOverPeers();
-	PScoreOverNetwork pScoreOverNetwork = new PScoreOverNetwork();
-	PCacheOverPeers pCacheOverPeers = new PCacheOverPeers();
-	ContinuityIndex continuityIndex = new ContinuityIndex();
-	PAverageOverTime pAverageOverTime= new PAverageOverTime();
+	Visualization visual[];
+	
 	
 	public static int counts=0;
 	
@@ -55,9 +56,12 @@ public class ControlRoom extends EventLoop{
 		for(int i=0;i < peerNumber;i++)
 			client[sourceNumber+i]= new PeerNode(false,m.serverAddress); //not source
 	
-		displayBegin();
+		
 		m.run();		
 	}	
+	public ControlRoom() {
+		displayBegin();
+	}
 	
 	public void createServer() throws Exception{			
 		BasicConfigurator.configure();
@@ -66,9 +70,18 @@ public class ControlRoom extends EventLoop{
 		new CentralNode(serverAddress);
 	}
 	
-	 public static void displayBegin(){
-		 System.out.println("Begin");
+	
+	public  void displayBegin(){
 		 
+		 System.out.println("Begin");
+		 visual = new Visualization[6];
+		 visual[0] = new MCacheOverPeers();
+		 visual[1] = new PScoreOverPeers();
+		 visual[2] = new PScoreOverNetwork();
+		 visual[3] = new PCacheOverPeers();
+		 visual[4] = new ContinuityIndex();
+		 visual[5]= new PAverageOverTime();
+			
 	 }
 	 
 	 @Override
@@ -94,7 +107,7 @@ public class ControlRoom extends EventLoop{
 			 System.out.print("My Partners are  : ");
 	    		for(int j=0;j<client[i].pSize;j++){
 	    			if(client[i].partners.getPartner(j)!=null)
-	    				System.out.print(" - "+(client[i].partners.getPartner(j).port));
+	    				System.out.print(" - "+(client[i].partners.getPartner(j).getPort()));
 	    		}
 	    		System.out.println("\n");
 	    		System.out.print("My Buffer Map : ");
@@ -105,32 +118,23 @@ public class ControlRoom extends EventLoop{
 	   		 
 		 }
 		 
-		 new ViewApp(mCacheOverPeers, pCacheOverPeers,pScoreOverNetwork,pScoreOverPeers,continuityIndex,pAverageOverTime);
+		 visual[0].set("Membership's cache visualization","Peer ID","Number of Members");
+		 visual[1].set("Score at Each Peer", "Peer ID", "Score");
+		 visual[2].set("Score Distribution Over Network","Score","Peers Number");
+		 visual[3].set("Partner's Cache Visualization", "Peers","Number of Partners");
+		 visual[4].set("Continuity Index at Each Peer", "Peer ID", "Continuity Index");
+		 visual[5].set("Average Score Visualization over time", "Time(Sec)", "Average Score");
 		 
-		 mCacheOverPeers.init();
-		 mCacheOverPeers.view(0);
-		 mCacheOverPeers.set("Membership's cache visualization","Peer ID","Number of Members");
 		 
-		 pScoreOverPeers.init();
-		 pScoreOverPeers.view(0);
-		 pScoreOverPeers.set("Score at Each Peer", "Peer ID", "Score");
-		 
-		 pScoreOverNetwork.init();
-		 pScoreOverNetwork.view(0);
-		 pScoreOverNetwork.set("Score Distribution Over Network","Score","Peers Number");
-		 
-		 pCacheOverPeers.init();
-		 pCacheOverPeers.view(0);
-		 pCacheOverPeers.set("Partner's Cache Visualization", "Peers","Number of Partners");
-			
-		 continuityIndex.init();
-		 continuityIndex.view(0);
-		 continuityIndex.set("Continuity Index at Each Peer", "Peer ID", "Continuity Index");
-		 
-		 pAverageOverTime.init(average);
-		 pAverageOverTime.view(0);
-		 pAverageOverTime.set("Average Score Visualization over time", "Time(Sec)", "Average Score");
-		 
+		 for(int k=0;k<visual.length;k++){
+			 if(!visual[k].isDependent())
+				 visual[k].init();
+			 else
+				 visual[k].init(average);
+				 
+			 visual[k].view(0); 
+		 }
+		 new ViewApp(visual);
 		 System.err.println("---> "+counts);
 	 }
 	 int[]empty={};
@@ -138,6 +142,19 @@ public class ControlRoom extends EventLoop{
 	protected boolean postEventExecution() {
 	if(Scheduler.getInstance().now%1000==0){
 	
+for(int i=0;i<client.length;i++){
+			
+			int missed=client[i].joinTime-client[i].startTime;
+			if(Scheduler.getInstance().now>client[i].videoSize+client[i].startTime){
+				client[i].allIndex=client[i].videoSize-(missed/1000);
+				continue;
+			}
+			int shouldHave=(int)Scheduler.getInstance().now-client[i].startTime;
+			int musthave=shouldHave-missed;
+			client[i].allIndex=musthave/1000;
+			
+		}
+		
 			fillMCacheOverPeers();
 			fillPCacheOverPeers();
 			fillPScoreOverPeers();
@@ -160,7 +177,7 @@ public class ControlRoom extends EventLoop{
 			}
 			else
 			mSlot1.add(new DataStructure(empty,String.valueOf(client[i].port)));
-		mCacheOverPeers.add(mSlot1);
+		visual[0].add(mSlot1);
 		
 	}
 	void fillPCacheOverPeers(){
@@ -172,14 +189,12 @@ public class ControlRoom extends EventLoop{
 			}
 			else
 			pSlot3.add(new DataStructure(empty,String.valueOf(client[i].port)));
-		pCacheOverPeers.add(pSlot3);
+		visual[3].add(pSlot3);
 		
 	}
 	void fillPScoreOverPeers(){
+		
 		TimeSlot pSlot1 = new TimeSlot();
-		
-		pScoreOverPeers.set("Partnership Visualization", "Peers","Partner's Points");
-		
 		for(int i=0;i<client.length;i++)
 			if(client[i]!=null){
 				int sum=bandwidthSum(client[i].partners.getCache());
@@ -189,11 +204,10 @@ public class ControlRoom extends EventLoop{
 			}
 			else
 			pSlot1.add(new DataStructure(empty,String.valueOf(client[i].port)));
-		pScoreOverPeers.add(pSlot1);
+		visual[1].add(pSlot1);
 	}
 	void fillPScoreOverNetwork(){
 		TimeSlot pSlot2 = new TimeSlot();
-		pScoreOverNetwork.set("Partnership Visualization", "Partner's Score","Weight");
 		int scores[] = new int[client.length]; 
 		for(int i=0;i<client.length;i++)
 			if(client[i]!=null){
@@ -202,12 +216,11 @@ public class ControlRoom extends EventLoop{
 			}
 		Arrays.sort(scores);
 		pSlot2.add(new DataStructure(scores,""));
-		pScoreOverNetwork.add(pSlot2);
+		visual[2].add(pSlot2);
 		
 	}
 	void fillContinuityIndex(){
 		TimeSlot sSlot1 = new TimeSlot();
-		continuityIndex.set("Continuity Index", "Peers","CI");
 		double CIs[] = new double[client.length]; 
 		for(int i=0;i<client.length;i++)
 			if(client[i]!=null){
@@ -218,7 +231,7 @@ public class ControlRoom extends EventLoop{
 				CIs[i]=CI;
 			}
 		sSlot1.add(new DataStructure(CIs,""));
-		continuityIndex.add(sSlot1);
+		visual[4].add(sSlot1);
 	}
 	void partnershipStat(){
 		if(this.index>=average.length)
@@ -230,7 +243,7 @@ public class ControlRoom extends EventLoop{
 	    		double sum=0;
 	    		for(int j=0;j<client[i].partners.getLength();j++){
 	    			if(client[i].partners.getPartner(j)!=null)
-	    			sum+=client[i].partners.getPartner(j).bandwidth;
+	    			sum+=client[i].partners.getPartner(j).getBandwidth();
 	    		}
 	    		bandwidth[index++]=sum/(double)client[i].partners.getLength();
 	    	}
@@ -251,7 +264,7 @@ public class ControlRoom extends EventLoop{
 		int sum=0;
 		for(int i=0;i<partner.length;i++)
 		if(partner[i]!=null)
-			sum+=partner[i].bandwidth;
+			sum+=partner[i].getBandwidth();
 		return sum;
 	}
 	

@@ -1,6 +1,8 @@
 package simpipe.coolstreaming;
 
 import java.net.SocketAddress;
+
+import se.peertv.peertvsim.core.Scheduler;
 import se.peertv.peertvsim.core.Timer;
 
 import org.springframework.beans.factory.BeanFactory;
@@ -11,7 +13,7 @@ import org.springframework.core.io.FileSystemResource;
 public class PeerNode extends Node {
     
 	boolean searching=true;
-    PeerProtocol protocol;
+    public PeerProtocol protocol;
     int time=0;
     
     PeerNode(boolean source,SocketAddress serverAdderess){
@@ -61,7 +63,7 @@ public class PeerNode extends Node {
  	 		 scheduler=p.getScheduler();
  	 		 members.setParams(mSize,port,deleteTime);
  	 		 partners.setParams(pSize,port,windowSize,defaultBandwidth,this);
- 	 		 scheduler.setParams(this,100);
+ 	 		 scheduler.setParams(this,startTime);
  			
  		 }
  		 catch(Exception e){

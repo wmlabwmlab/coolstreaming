@@ -20,7 +20,7 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
-public class PAverageOverTime extends JPanel implements Visualization{
+public class PAverageOverTime extends Visualization{
 	
 	int index=0;
 	ChartPanel chartPanel;
@@ -42,6 +42,16 @@ public class PAverageOverTime extends JPanel implements Visualization{
 	}
 	public void init(double[] data){
 		this.data=data;
+	}
+	
+	@Override
+	public boolean isDependent() {
+		return true;
+	}
+	
+	@Override
+	public String getTitle() {
+		return title;
 	}
 	
 	public void add(TimeSlot t){
