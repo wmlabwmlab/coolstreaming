@@ -30,11 +30,11 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 		this.node=node;
 		this.startTime = startTime;
 		fillDeadLine();
-		wholeBits=new int[node.videoSize];
-		supplier=new int[node.windowSize];
-		if(node.isSource)
+		wholeBits=new int[node.getVideoSize()];
+		supplier=new int[node.getWindowSize()];
+		if(node.isSource())
 		{
-			for(int i=0;i<node.videoSize;i++){
+			for(int i=0;i<node.getVideoSize();i++){
 				wholeBits[i]=1;
 			}
 		}
@@ -45,11 +45,11 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 		this.node=node;
 		this.startTime = startTime;
 		fillDeadLine();
-		wholeBits=new int[node.videoSize];
-		supplier=new int[node.windowSize];
-		if(node.isSource)
+		wholeBits=new int[node.getVideoSize()];
+		supplier=new int[node.getWindowSize()];
+		if(node.isSource())
 		{
-			for(int i=0;i<node.videoSize;i++){
+			for(int i=0;i<node.getVideoSize();i++){
 				wholeBits[i]=1;
 			}
 		}
@@ -58,7 +58,7 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 	
 	@Override
 	public void fillDeadLine(){
-		deadLine=new int[node.videoSize];
+		deadLine=new int[node.getVideoSize()];
 		int start=startTime/1000;	//in seconds
 		for(int i=0;i<deadLine.length;i++){
 			deadLine[i]=start+i+slack;
@@ -74,14 +74,14 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 	
 	@Override
 	public BitField getWindow(int now){
-			BitField bits = new BitField(node.windowSize);
+			BitField bits = new BitField(node.getWindowSize());
 			int diff=now-startTime;
 			diff=diff/1000; //conv to sec
 			int j=0;
-			for(int i=diff;i<node.windowSize+diff;i++){
-				if(j==node.windowSize)
+			for(int i=diff;i<node.getWindowSize()+diff;i++){
+				if(j==node.getWindowSize())
 					break;
-				if(i<node.videoSize)
+				if(i<node.getVideoSize())
 					bits.setBit(j,wholeBits[i]);
 				else
 					bits.setBit(j,0);
@@ -100,15 +100,15 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
     	int milliesNow=(int)Scheduler.getInstance().now;	
     	int secondNow=milliesNow/1000;
     	timeSlot = milliesNow;
-    	for(int i=0;i<node.videoSize;i++)
+    	for(int i=0;i<node.getVideoSize();i++)
 	    	if(wholeBits[i]==0&&deadLine[i]<secondNow){
 	    		timeSlot=startTime+(i*1000);
 	    		break;
 	    	}
     	requesting=true;
-    	for(int i=0;i<node.pSize;i++)
-    		if(node.partners.getPartner(i)!=null){
-    		node.partners.getPartner(i).session.write(""+Constants.BUFFERMAP_REQUEST+timeSlot);
+    	for(int i=0;i<node.getPSize();i++)
+    		if(node.getPartners().getPartner(i)!=null){
+    		node.getPartners().getPartner(i).session.write(""+Constants.BUFFERMAP_REQUEST+timeSlot);
    		}
     	
     	try {
@@ -120,17 +120,17 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
     
 	@Override
 	public BitField beginscheduling(){
-		BitField field = new BitField(node.windowSize);
+		BitField field = new BitField(node.getWindowSize());
 		int index=0;
 		int length=0;
 		int timeNow=(int)Scheduler.getInstance().now;
-		for(int i=0;i<node.windowSize;i++){
-			for(int j=0;j<node.pSize;j++){
-				if(node.partners.getPartner(j)==null)
+		for(int i=0;i<node.getWindowSize();i++){
+			for(int j=0;j<node.getPSize();j++){
+				if(node.getPartners().getPartner(j)==null)
 					continue;
-				if(timeSlot!=node.partners.getPartner(j).bufferMap.time)
+				if(timeSlot!=node.getPartners().getPartner(j).bufferMap.time)
 					continue;
-				if(node.partners.getPartner(j).bufferMap.bits[i]==1&&isValid(i,timeNow)){
+				if(node.getPartners().getPartner(j).bufferMap.bits[i]==1&&isValid(i,timeNow)){
 					length++;
 				}
 			}
@@ -139,13 +139,13 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 			
 			index=0;
 			Partner supp[]=new Partner[length];
-			for(int k=0;k<node.pSize;k++){
-				if(node.partners.getPartner(k)==null)
+			for(int k=0;k<node.getPSize();k++){
+				if(node.getPartners().getPartner(k)==null)
 					continue;
-				if(timeSlot!=node.partners.getPartner(k).bufferMap.time)
+				if(timeSlot!=node.getPartners().getPartner(k).bufferMap.time)
 					continue;
-				if(node.partners.getPartner(k).bufferMap.bits[i]==1&&isValid(i,timeNow)){
-					supp[index++]=node.partners.getPartner(k);
+				if(node.getPartners().getPartner(k).bufferMap.bits[i]==1&&isValid(i,timeNow)){
+					supp[index++]=node.getPartners().getPartner(k);
 				}
 			}
 			
@@ -157,11 +157,11 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 			
 			int bandwidth[]=new int[length];
 			for(int counter=0;counter<length;counter++){
-				int pos=node.partners.getIndex(supp[counter].port);
+				int pos=node.getPartners().getIndex(supp[counter].port);
 				if(pos!=-1)
-				bandwidth[counter]=node.partners.getPartner(pos).bandwidth;
+				bandwidth[counter]=node.getPartners().getPartner(pos).bandwidth;
 				else
-				bandwidth[counter]=node.defaultBandwidth;
+				bandwidth[counter]=node.getDefaultBandwidth();
 			}
 			int pos=pickPeer(bandwidth);
 			field.setBit(i,supp[pos].port);
@@ -211,25 +211,25 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 			int diff=(timeSlot - startTime)/1000;
 			
 			// is the movie finished
-			if(diff >= node.videoSize)
+			if(diff >= node.getVideoSize())
 				return;
 			
 			BitField field = beginscheduling();
 			
 			int loc = 0;
-			for(int i=0;i < node.windowSize;i++){
+			for(int i=0;i < node.getWindowSize();i++){
 				// is the movie finished
-				if(diff+i >= node.videoSize)
+				if(diff+i >= node.getVideoSize())
 					return;
 				
 				if(wholeBits[diff+i]==1 || field.bits[i]==0)
 					continue;
 
-				loc = node.partners.getIndex(field.bits[i]);
+				loc = node.getPartners().getIndex(field.bits[i]);
 				if(loc==-1)
 					continue;
 				int sum=diff+i;
-				node.partners.getPartner(loc).session.write(""+Constants.SEGMENT_REQUEST+sum);
+				node.getPartners().getPartner(loc).session.write(""+Constants.SEGMENT_REQUEST+sum);
 			}
 		}
 		
