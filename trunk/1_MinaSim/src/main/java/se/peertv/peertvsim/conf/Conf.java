@@ -14,7 +14,7 @@ public class Conf {
 
 
 	// Simulator Parameters
-	public static long MAX_SIMULATION_TIME = 1000*40*10; //1000*60*10; // 10 minutes
+	public static long MAX_SIMULATION_TIME = 1000*60*10; //1000*60*10; // 10 minutes
 
 	public static int RANDOM_SEED = 4;
 		

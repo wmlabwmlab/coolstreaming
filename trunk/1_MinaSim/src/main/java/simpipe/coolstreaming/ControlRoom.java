@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 
 import se.peertv.peertvsim.core.EventLoop;
 import se.peertv.peertvsim.core.Scheduler;
+import se.peertv.peertvsim.core.Timer;
 import simpipe.SimPipeAddress;
 import simpipe.coolstreaming.implementations.Partner;
 import simpipe.coolstreaming.visualization.ContinuityIndex;
@@ -40,26 +41,61 @@ public class ControlRoom extends EventLoop{
 	static PeerNode client[];
 	Visualization visual[];
 	
+	static int peerNumber=20;
+	static int sourceNumber=5;
+	static int maxPeers=0;
+	static int portStart=15;
+	int[]empty={};
+	static int creationRate = 500; // 1 client per 0.5 minute 
 	
 	public static int counts=0;
 	
 	public static void main(String[] args) throws Exception {
 		ControlRoom m = new ControlRoom();		
 		m.createServer();
-		int peerNumber=20;
-		int sourceNumber=5;
 		client=new PeerNode[peerNumber+sourceNumber];
 
-		for(int i=0;i<sourceNumber;i++)	  //source
-			client[i]= new PeerNode(true,m.serverAddress); 
 		
-		for(int i=0;i < peerNumber;i++)
-			client[sourceNumber+i]= new PeerNode(false,m.serverAddress); //not source
-	
+		//int portStart=15;
+		//for(int i=0;i<sourceNumber;i++)	  //source
+		//	client[i]= new PeerNode(true,m.serverAddress,portStart+i); 
+		//portStart+=sourceNumber;
+		//for(int i=0;i < peerNumber;i++)
+		//	client[sourceNumber+i]= new PeerNode(false,m.serverAddress,portStart+i); //not source
 		
 		m.run();		
 	}	
+	
+	public void createClient(int time){
+		if(maxPeers<peerNumber){
+			client[maxPeers]= new PeerNode(false,serverAddress,portStart+maxPeers);
+			maxPeers++;
+			System.err.println("New Peer "+portStart+maxPeers+" trying to connect at time: "+time);
+		}
+		else{
+			if(maxPeers<(peerNumber+sourceNumber)){
+				client[maxPeers]= new PeerNode(true,serverAddress,portStart+maxPeers);
+				maxPeers++;
+				System.err.println("New Source "+portStart+maxPeers+" trying to connect at time: "+time);
+			}
+		}
+		if(maxPeers<peerNumber+sourceNumber)
+		try{
+			Timer timer = new Timer(creationRate,this,"createClient",(int)Scheduler.getInstance().now+creationRate);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	
 	public ControlRoom() {
+		try{
+			Timer timer = new Timer(creationRate,this,"createClient",(int)Scheduler.getInstance().now+creationRate);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
 		displayBegin();
 	}
 	
@@ -137,23 +173,28 @@ public class ControlRoom extends EventLoop{
 		 new ViewApp(visual);
 		 System.err.println("---> "+counts);
 	 }
-	 int[]empty={};
+	 
 	@Override
 	protected boolean postEventExecution() {
-	if(Scheduler.getInstance().now%1000==0){
-	
-for(int i=0;i<client.length;i++){
+		
+		int time =(int)Scheduler.getInstance().now;
+		
+		
+		if(time%1000==0){
 			
-			int missed=client[i].joinTime-client[i].startTime;
-			if(Scheduler.getInstance().now>client[i].videoSize+client[i].startTime){
-				client[i].allIndex=client[i].videoSize-(missed/1000);
-				continue;
+			for(int i=0;i<client.length;i++){
+				if(client[i]==null)
+					continue;
+				int now=(int)Scheduler.getInstance().now/1000;
+				int missed=(client[i].joinTime-client[i].startTime)/1000;
+				if(now>client[i].videoSize+(client[i].startTime/1000)){
+					client[i].allIndex=client[i].videoSize-missed;
+					continue;
+				}
+				int shouldHave=now-(client[i].startTime/1000);
+				int musthave=shouldHave-missed;
+				client[i].allIndex=musthave;
 			}
-			int shouldHave=(int)Scheduler.getInstance().now-client[i].startTime;
-			int musthave=shouldHave-missed;
-			client[i].allIndex=musthave/1000;
-			
-		}
 		
 			fillMCacheOverPeers();
 			fillPCacheOverPeers();
@@ -162,84 +203,91 @@ for(int i=0;i<client.length;i++){
 			fillContinuityIndex();
 			partnershipStat();
 	
-	}
+		}
 		
 		return false;
 	}
-	
+
 	void fillMCacheOverPeers(){
+		
 		TimeSlot mSlot1=new TimeSlot();
-		int[]empty={};
 		for(int i=0;i<client.length;i++)
-			if(client[i]!=null){
+			if(client[i]!=null&&client[i].members!=null){
 				int mCache[]=client[i].members.toArray();
 				mSlot1.add(new DataStructure(mCache,String.valueOf(client[i].port)));	
 			}
 			else
-			mSlot1.add(new DataStructure(empty,String.valueOf(client[i].port)));
+			continue;
 		visual[0].add(mSlot1);
 		
 	}
+	
 	void fillPCacheOverPeers(){
+	
 		TimeSlot pSlot3=new TimeSlot();
 		for(int i=0;i<client.length;i++)
-			if(client[i]!=null){
+			if(client[i]!=null&&client[i].partners!=null){
 				int pCache[]=client[i].partners.toArray();
 				pSlot3.add(new DataStructure(pCache,String.valueOf(client[i].port)));
 			}
 			else
-			pSlot3.add(new DataStructure(empty,String.valueOf(client[i].port)));
+			continue;
 		visual[3].add(pSlot3);
-		
 	}
 	void fillPScoreOverPeers(){
 		
 		TimeSlot pSlot1 = new TimeSlot();
 		for(int i=0;i<client.length;i++)
-			if(client[i]!=null){
+			if(client[i]!=null&&client[i].partners!=null){
 				int sum=bandwidthSum(client[i].partners.getCache());
 				int bandwidth[]={sum};
 				pSlot1.add(new DataStructure(bandwidth,String.valueOf(client[i].port)));
 				
 			}
 			else
-			pSlot1.add(new DataStructure(empty,String.valueOf(client[i].port)));
+			continue;
 		visual[1].add(pSlot1);
 	}
+	
 	void fillPScoreOverNetwork(){
+		
 		TimeSlot pSlot2 = new TimeSlot();
 		int scores[] = new int[client.length]; 
 		for(int i=0;i<client.length;i++)
-			if(client[i]!=null){
+			if(client[i]!=null&&client[i].partners!=null){
 				int sum=bandwidthSum(client[i].partners.getCache());
 				scores[i]=sum;
 			}
+			else 
+				continue;
 		Arrays.sort(scores);
 		pSlot2.add(new DataStructure(scores,""));
 		visual[2].add(pSlot2);
 		
 	}
+	
 	void fillContinuityIndex(){
+		
 		TimeSlot sSlot1 = new TimeSlot();
 		double CIs[] = new double[client.length]; 
 		for(int i=0;i<client.length;i++)
 			if(client[i]!=null){
 				double CI=(((double)client[i].continuityIndex)/((double)client[i].allIndex));
-				if(Double.isNaN(CI)){
+				if(Double.isNaN(CI))
 					CI=1;
-				}
 				CIs[i]=CI;
 			}
 		sSlot1.add(new DataStructure(CIs,""));
 		visual[4].add(sSlot1);
 	}
-	void partnershipStat(){
+void partnershipStat(){
+		
 		if(this.index>=average.length)
 			return;
 	    double bandwidth[]=new double[getLength()];
 	    int index=0;
 	    for(int i=0;i<client.length;i++){
-	    	if(client[i]!=null){
+	    	if(client[i]!=null&&client[i].partners!=null){
 	    		double sum=0;
 	    		for(int j=0;j<client[i].partners.getLength();j++){
 	    			if(client[i].partners.getPartner(j)!=null)

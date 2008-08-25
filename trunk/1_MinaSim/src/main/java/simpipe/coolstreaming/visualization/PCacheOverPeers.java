@@ -94,6 +94,16 @@ public class PCacheOverPeers extends  Visualization{
 	}
 	public void view(int time){
 		
+		index=time;
+		next.setEnabled(true);
+		prev.setEnabled(true);
+		if(time==0)
+			prev.setEnabled(false);
+		if(time>=slots.size()-1){
+			time=slots.size()-1;
+			next.setEnabled(false);
+		}
+		
 		TimeSlot slot= slots.get(time);
 		final DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 		for(int i=0;i<slot.slots.size();i++){
@@ -127,7 +137,7 @@ public class PCacheOverPeers extends  Visualization{
 	}
 	private JFreeChart createChart(final CategoryDataset dataset,int time) {
 
-		int incTime=time+1;
+		int incTime=time;
         final JFreeChart chart = ChartFactory.createStackedBarChart(
             title+" at time = "+incTime,  // chart title
             xAxis,                  // domain axis label

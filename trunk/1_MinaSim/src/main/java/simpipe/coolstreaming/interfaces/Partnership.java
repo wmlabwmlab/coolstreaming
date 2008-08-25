@@ -12,7 +12,7 @@ public interface Partnership {
 	void forceAddPartner(int port,IoSession session);
 	void setBandwidth(int port, int bandwidth);
 	void deletePartner(int port);
-	void clearPartners();
+	int clearPartners();
 	String getPartners();
 	Partner getPartner(int i);
 	void setPartner(int index,Partner p);

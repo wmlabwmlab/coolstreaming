@@ -20,7 +20,7 @@ public class Node {
 	
 	final int pSize=4;
     final int mSize=20;
-    int deputyHops=4;
+    int deputyHops=5;
     int deleteTime=60000; // time to delete the members from the mCache
     int bootTime=3000;
     int continuityIndex;
