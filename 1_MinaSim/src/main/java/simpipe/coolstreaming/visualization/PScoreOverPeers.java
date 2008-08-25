@@ -94,6 +94,16 @@ public class PScoreOverPeers extends Visualization{
 	}
 	public void view(int time){
 		
+		index=time;
+		next.setEnabled(true);
+		prev.setEnabled(true);
+		if(time==0)
+			prev.setEnabled(false);
+		if(time>=slots.size()-1){
+			time=slots.size()-1;
+			next.setEnabled(false);
+		}
+			
 		TimeSlot slot= slots.get(time);
 		final DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 		for(int i=0;i<slot.slots.size();i++){

@@ -31,8 +31,8 @@ public class PeerProtocol extends IoHandlerAdapter{
     	if(bootStraping){
 			bootStraping=false;
     		node.initalizeNode();
-			node.port=Integer.parseInt(session.getLocalAddress().toString());
-			int listenPort=Integer.parseInt(session.getLocalAddress().toString()) + Constants.SERVER_PORT;
+			//node.port=Integer.parseInt(session.getLocalAddress().toString());
+			int listenPort=node.port+ Constants.SERVER_PORT;
 			IoServiceConfig config;
 			IoAcceptor acceptor;
 			acceptor = new SimPipeAcceptor();
@@ -200,7 +200,9 @@ public class PeerProtocol extends IoHandlerAdapter{
 			catch(Exception e){
 				
 			}
-			if(hops==0){
+			
+			if(hops==0&&node.partners.getLength()==node.pSize){
+				System.err.println(destination+" is dying");
 				node.partners.forceAddPartner(destination,session);
 				session.write(Constants.BANDWIDTH_REQUEST+"");
     			node.members.addMember(destination);

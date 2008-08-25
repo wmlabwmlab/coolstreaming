@@ -38,7 +38,11 @@ public class ServerProtocol extends IoHandlerAdapter {
     public void messageReceived(IoSession session, Object message) {
 
     	if(((String)message).charAt(0)== Constants.CONNECTION_REQUEST){ //i.e. another client writes to me because he wants to join the network
-    		    int client=Integer.parseInt(session.getRemoteAddress().toString());
+    		    String messageContent=(String)message;
+    		    String []parameters=messageContent.split(Constants.MESSAGE_SEPARATOR);
+    			int client=Integer.parseInt(parameters[1]);
+    		    System.out.println("got "+client);
+    		    
     		    int port=node.members.getAnotherDeputy(client);
     			node.members.addMember(client);
     			session.write(""+Constants.DEPUTY_MESSAGE+port);

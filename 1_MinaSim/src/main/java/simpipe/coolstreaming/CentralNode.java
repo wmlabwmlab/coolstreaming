@@ -8,7 +8,7 @@ public class CentralNode  {
     
     RandomMembership members;
     ServerProtocol protocol;
-    private int mSize = 20;
+    private int mSize = 60;
     int deleteTime=60000; // time to delete the members from the mCache
     public CentralNode(SocketAddress serverAddress){
     	protocol = new ServerProtocol(serverAddress,this);

@@ -16,19 +16,26 @@ public class PeerNode extends Node {
     public PeerProtocol protocol;
     int time=0;
     
-    PeerNode(boolean source,SocketAddress serverAdderess){
+    PeerNode(boolean source,SocketAddress serverAdderess,int port){
     	isSource=source;
 		protocol = new PeerProtocol(serverAdderess,this); 
+		this.port=port;
     }
-    
+    int i=0;
     public void reboot(int dull){ 
     	
-    	if(this.searching||partners.getLength()==0){
+    	if((this.searching||partners.getLength()==0)&&i++==4){
     		this.deputyHops=4;
-    		protocol.connectTo(0);	
+    		protocol.connectTo(0);
+    		System.err.println("REBOOOOT "+port);
     	}
     	else{
-    		partners.clearPartners();
+    		int size= partners.clearPartners();
+    		if(size==0){
+    			this.deputyHops=4;
+        		protocol.connectTo(0);
+    		}
+    			
     		scheduler.identifyRequiredSegments();
     	}
     	

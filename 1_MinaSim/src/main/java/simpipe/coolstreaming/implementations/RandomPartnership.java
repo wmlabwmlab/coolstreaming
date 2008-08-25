@@ -119,7 +119,7 @@ public class RandomPartnership implements Partnership {
     
     //deletes any partner who has left the network without sending departure message
 	@Override
-	public synchronized void clearPartners(){
+	public synchronized int clearPartners(){
     	for(int i=0;i<pSize;i++)
     		if(pCache[i]!=null)
     		if(pCache[i].session!=null){
@@ -129,7 +129,7 @@ public class RandomPartnership implements Partnership {
     		else{
     			pCache[i]=null;
     		}
-    			
+    		return getLength();	
     }
 	
 	@Override
