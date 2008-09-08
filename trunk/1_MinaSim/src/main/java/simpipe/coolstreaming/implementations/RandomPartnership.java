@@ -24,7 +24,7 @@ public class RandomPartnership implements Partnership {
     RandomPartnership(){
     	
     }
-    RandomPartnership(int pSize,int port,int windowSize,int defaultBandwidth, PeerNode node ){
+    public RandomPartnership(int pSize,int port,int windowSize,int defaultBandwidth, PeerNode node ){
     	this.port=port;
     	this.windowSize=windowSize;
     	this.defaultBandwidth=defaultBandwidth;
@@ -67,8 +67,21 @@ public class RandomPartnership implements Partnership {
     
     // adds partner to the partner's cache
 	@Override
-	public synchronized boolean addPartner(int port,IoSession session){ //add anew partner to my partner's cache
+	public synchronized boolean addPartner(int port,IoSession session,boolean isTracker){ //add anew partner to my partner's cache
 
+		if(isTracker){
+			if(getLength()==pSize){
+				return false;
+			}
+			else{
+				for(int i=0;i<pCache.length;i++)
+		    		if(pCache[i]==null){
+		    			pCache[i]= new Partner(port,defaultBandwidth,session,new BitField(windowSize));
+		    			return true;
+		    		}
+			}
+		}
+		
     	if(port > Constants.SERVER_PORT)
     		port -= Constants.SERVER_PORT;
 
@@ -99,6 +112,21 @@ public class RandomPartnership implements Partnership {
     }
     
 	@Override
+	public synchronized int getAnotherDeputy(int destPort){ 
+	    	int[] temp=new int[getLength()];
+	    	if(temp.length==0)
+	    		return destPort;
+	    	int j=0;
+	    	for(int i=0;i<pCache.length;i++)
+	    		if(pCache[i]!=null)
+	    			temp[j++]=pCache[i].port;
+	    	int rand=(int)Math.round((Math.random()*temp.length));
+	    	if(rand>=temp.length)
+	    		rand=0;
+	    	return temp[rand];
+	    }
+	
+	@Override
     public synchronized void setBandwidth(int port, int bandwidth){
     	int index=getIndex(port);
     	if(index!=-1){
@@ -123,8 +151,11 @@ public class RandomPartnership implements Partnership {
     	for(int i=0;i<pSize;i++)
     		if(pCache[i]!=null)
     		if(pCache[i].session!=null){
-    		if(pCache[i].session.isClosing()||!pCache[i].session.isConnected()||pCache[i].port==port||pCache[i].port == Constants.SERVER_PORT)
+    		if(pCache[i].session.isClosing()||!pCache[i].session.isConnected()||pCache[i].port==port||pCache[i].port == Constants.SERVER_PORT){
     			pCache[i]=null;
+    			if(node==null)
+    			System.out.println("someone deleted meeeeeeeee so I'll delete him");
+    		}
     		}
     		else{
     			pCache[i]=null;

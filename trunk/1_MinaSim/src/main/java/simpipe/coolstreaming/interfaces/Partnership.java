@@ -8,7 +8,8 @@ import simpipe.coolstreaming.implementations.Partner;
 public interface Partnership {
 
 	void setParams(int pSize,int port,int windowSize,int defaultBandwidth, PeerNode node );
-	boolean addPartner(int port,IoSession session);
+	boolean addPartner(int port,IoSession session,boolean isTracker);
+	int getAnotherDeputy(int destPort);
 	void forceAddPartner(int port,IoSession session);
 	void setBandwidth(int port, int bandwidth);
 	void deletePartner(int port);

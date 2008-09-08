@@ -31,22 +31,26 @@ import org.apache.commons.math.stat.*;
 
 public class ControlRoom extends EventLoop{
 
+	
+	static int peerNumber=20;
+	static int sourceNumber=5;
+	static int creationRate = 500; // 1 client per 0.5 minute 
+	static int portStart=15;
+	final static boolean 	SIM_MODE = true;
+	int trackerCapacity=300;
+	
 	int time=(int)se.peertv.peertvsim.conf.Conf.MAX_SIMULATION_TIME/1000;
 	double average[]=new double[time+10];
 	double varience[]=new double[time+10];
 	int index=0;
 	
-	final static boolean 	SIM_MODE = true;
 	SocketAddress serverAddress;
 	static PeerNode client[];
+	static CentralNode tracker;
 	Visualization visual[];
 	
-	static int peerNumber=20;
-	static int sourceNumber=5;
 	static int maxPeers=0;
-	static int portStart=15;
 	int[]empty={};
-	static int creationRate = 500; // 1 client per 0.5 minute 
 	
 	public static int counts=0;
 	
@@ -67,6 +71,18 @@ public class ControlRoom extends EventLoop{
 	}	
 	
 	public void createClient(int time){
+		tracker.members.clearPartners();
+//		int peers[]=tracker.members.toArray();
+//		System.out.println("==========================================");
+//		System.out.println("My children are : ");
+//		for(int i=0;i<peers.length;i++)
+//			if(peers[i]!=0)
+//				System.out.println(peers[i]);
+//		try{
+//			Thread.sleep(3000);
+//		}
+//		catch(Exception e){}
+//		
 		if(maxPeers<peerNumber){
 			client[maxPeers]= new PeerNode(false,serverAddress,portStart+maxPeers);
 			maxPeers++;
@@ -103,7 +119,7 @@ public class ControlRoom extends EventLoop{
 		BasicConfigurator.configure();
 		Logger.getRootLogger().setLevel(Level.OFF);
 		serverAddress = new SimPipeAddress(Constants.SERVER_PORT);
-		new CentralNode(serverAddress);
+		tracker = new CentralNode(serverAddress,trackerCapacity);
 	}
 	
 	

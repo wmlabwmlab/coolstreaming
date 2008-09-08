@@ -5,6 +5,7 @@ import simpipe.coolstreaming.interfaces.*;
 
 public class Node {
 	
+	boolean isTracker=false;
 	int port;
 	boolean isSource=false;
 	int dummy=400;

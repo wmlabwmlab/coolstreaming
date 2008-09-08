@@ -3,15 +3,18 @@ package simpipe.coolstreaming;
 import java.net.SocketAddress;
 
 import simpipe.coolstreaming.implementations.RandomMembership;
+import simpipe.coolstreaming.implementations.RandomPartnership;
 
 public class CentralNode  {
     
-    RandomMembership members;
+    RandomPartnership members;
     ServerProtocol protocol;
-    private int mSize = 60;
-    int deleteTime=60000; // time to delete the members from the mCache
-    public CentralNode(SocketAddress serverAddress){
+    private int pSize = 500;
+    boolean isTracker=true;
+    
+    public CentralNode(SocketAddress serverAddress,int size){
+    	pSize=size;
     	protocol = new ServerProtocol(serverAddress,this);
-    	members=new RandomMembership(mSize,Constants.SERVER_PORT,deleteTime);
+    	members=new RandomPartnership(pSize,Constants.SERVER_PORT,0,0,null);
     }
 }
