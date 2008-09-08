@@ -40,11 +40,11 @@ public class ServerProtocol extends IoHandlerAdapter {
     	if(((String)message).charAt(0)== Constants.CONNECTION_REQUEST){ //i.e. another client writes to me because he wants to join the network
     		    String messageContent=(String)message;
     		    String []parameters=messageContent.split(Constants.MESSAGE_SEPARATOR);
-    			int client=Integer.parseInt(parameters[1]);
-    		    System.out.println("got "+client);
+    			int newPeer=Integer.parseInt(parameters[1]);
+    		    System.out.println("got "+newPeer);
     		    
-    		    int port=node.members.getAnotherDeputy(client);
-    			node.members.addMember(client);
+    		    int port=node.members.getAnotherDeputy(newPeer);
+    			node.members.addPartner(newPeer,session,node.isTracker);
     			session.write(""+Constants.DEPUTY_MESSAGE+port);
     	}
     }

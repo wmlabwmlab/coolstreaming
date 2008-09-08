@@ -5,6 +5,7 @@ import java.net.SocketAddress;
 import se.peertv.peertvsim.core.Scheduler;
 import se.peertv.peertvsim.core.Timer;
 
+import org.apache.mina.common.IoSession;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.FileSystemResource;
@@ -15,6 +16,7 @@ public class PeerNode extends Node {
 	boolean searching=true;
     public PeerProtocol protocol;
     int time=0;
+    IoSession serverBond;
     
     PeerNode(boolean source,SocketAddress serverAdderess,int port){
     	isSource=source;

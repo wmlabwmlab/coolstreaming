@@ -32,7 +32,8 @@ public class PeerProtocol extends IoHandlerAdapter{
 			bootStraping=false;
     		node.initalizeNode();
 			//node.port=Integer.parseInt(session.getLocalAddress().toString());
-			int listenPort=node.port+ Constants.SERVER_PORT;
+			node.serverBond=session;
+    		int listenPort=node.port+ Constants.SERVER_PORT;
 			IoServiceConfig config;
 			IoAcceptor acceptor;
 			acceptor = new SimPipeAcceptor();
@@ -149,7 +150,7 @@ public class PeerProtocol extends IoHandlerAdapter{
 		ControlRoom.counts--;
 		int destination = Integer.parseInt(msgPart2);
 		node.members.addMember(destination);
-		boolean added = node.partners.addPartner(destination, session);
+		boolean added = node.partners.addPartner(destination, session,node.isTracker);
 		if(added){
 			session.write(""+Constants.PARTNERSHIP_RESPONSE+node.port+Constants.MESSAGE_SEPARATOR+Constants.REQUEST_ACCEPTED);
 			session.write(Constants.BANDWIDTH_REQUEST+"");
@@ -175,6 +176,7 @@ public class PeerProtocol extends IoHandlerAdapter{
     }    
     
 	public void deputyMessage(String msgPart2,IoSession session){
+		if(Integer.parseInt(session.getRemoteAddress().toString())!=Constants.SERVER_PORT)
 		session.close();
 		String myPort=String.valueOf(node.port);
 		if(!msgPart2.equals(myPort)){
@@ -215,7 +217,7 @@ public class PeerProtocol extends IoHandlerAdapter{
     		}
     	}
     	else{
-			if(node.partners.addPartner(destination,session)){
+			if(node.partners.addPartner(destination,session,node.isTracker)){
 				node.members.addMember(destination);
 				session.write(Constants.BANDWIDTH_REQUEST+"");
 				String ports=node.partners.getPartners();
@@ -228,7 +230,7 @@ public class PeerProtocol extends IoHandlerAdapter{
 	public void partnersMessage(String msgPart2,IoSession session){
 		node.searching=false;
 		String []partners=msgPart2.split(Constants.MESSAGE_SEPARATOR);
-		if(node.partners.addPartner(Integer.parseInt(partners[0]),session))
+		if(node.partners.addPartner(Integer.parseInt(partners[0]),session,node.isTracker))
 			session.write(Constants.BANDWIDTH_REQUEST+"");
 	}
 	
@@ -237,7 +239,7 @@ public class PeerProtocol extends IoHandlerAdapter{
 		int port=Integer.parseInt(bandwidthParam[0]);
 		int confirm=Integer.parseInt(bandwidthParam[1]);
 		
-		if(confirm == Constants.REQUEST_ACCEPTED && node.partners.addPartner(port, session))
+		if(confirm == Constants.REQUEST_ACCEPTED && node.partners.addPartner(port, session,node.isTracker))
 			session.write(Constants.BANDWIDTH_REQUEST+"");
 		else{
 			session.close();
