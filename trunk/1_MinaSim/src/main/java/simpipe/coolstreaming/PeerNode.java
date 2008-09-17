@@ -24,6 +24,7 @@ public class PeerNode extends Node {
 		this.port=port;
     }
     int i=0;
+    int deputyCall=0;
     public void reboot(int dull){ 
     	
     	if((this.searching||partners.getLength()==0)&&i++==4){

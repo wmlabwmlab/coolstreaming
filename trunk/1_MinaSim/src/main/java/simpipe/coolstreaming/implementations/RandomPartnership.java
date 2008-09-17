@@ -113,12 +113,19 @@ public class RandomPartnership implements Partnership {
     
 	@Override
 	public synchronized int getAnotherDeputy(int destPort){ 
-	    	int[] temp=new int[getLength()];
-	    	if(temp.length==0)
-	    		return destPort;
+			
+			if(getLength()==0)
+				return destPort;
+			
+			int[] temp=null;
+			if(getIndex(destPort)==-1)
+	    		temp=new int[getLength()];
+	    	else
+	    		temp=new int[getLength()-1];
+	    	
 	    	int j=0;
 	    	for(int i=0;i<pCache.length;i++)
-	    		if(pCache[i]!=null)
+	    		if(pCache[i]!=null&&pCache[i].port!=destPort)
 	    			temp[j++]=pCache[i].port;
 	    	int rand=(int)Math.round((Math.random()*temp.length));
 	    	if(rand>=temp.length)

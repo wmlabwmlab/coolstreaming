@@ -232,6 +232,7 @@ public class PeerProtocol extends IoHandlerAdapter{
 		String []partners=msgPart2.split(Constants.MESSAGE_SEPARATOR);
 		if(node.partners.addPartner(Integer.parseInt(partners[0]),session,node.isTracker))
 			session.write(Constants.BANDWIDTH_REQUEST+"");
+		node.serverBond.write(Constants.STABLEIZED+""+Constants.MESSAGE_SEPARATOR+""+node.port);
 	}
 	
 	public void receivePartnershipResponse(String msgPart2,IoSession session){

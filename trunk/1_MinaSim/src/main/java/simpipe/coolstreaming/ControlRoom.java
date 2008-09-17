@@ -18,6 +18,7 @@ import simpipe.coolstreaming.implementations.Partner;
 import simpipe.coolstreaming.visualization.ContinuityIndex;
 import simpipe.coolstreaming.visualization.DataStructure;
 import simpipe.coolstreaming.visualization.MCacheOverPeers;
+import simpipe.coolstreaming.visualization.NetworkVisualization;
 import simpipe.coolstreaming.visualization.PAverageOverTime;
 import simpipe.coolstreaming.visualization.PCacheOverPeers;
 import simpipe.coolstreaming.visualization.PScoreOverNetwork;
@@ -71,6 +72,7 @@ public class ControlRoom extends EventLoop{
 	}	
 	
 	public void createClient(int time){
+		System.err.println("FIREEEEEEEEEEEEEEEEEEEE");
 		tracker.members.clearPartners();
 //		int peers[]=tracker.members.toArray();
 //		System.out.println("==========================================");
@@ -126,14 +128,14 @@ public class ControlRoom extends EventLoop{
 	public  void displayBegin(){
 		 
 		 System.out.println("Begin");
-		 visual = new Visualization[6];
+		 visual = new Visualization[7];
 		 visual[0] = new MCacheOverPeers();
 		 visual[1] = new PScoreOverPeers();
 		 visual[2] = new PScoreOverNetwork();
 		 visual[3] = new PCacheOverPeers();
 		 visual[4] = new ContinuityIndex();
 		 visual[5]= new PAverageOverTime();
-			
+		 visual[6] = new NetworkVisualization();	
 	 }
 	 
 	 @Override
@@ -197,7 +199,7 @@ public class ControlRoom extends EventLoop{
 		
 		
 		if(time%1000==0){
-			
+			/*
 			for(int i=0;i<client.length;i++){
 				if(client[i]==null)
 					continue;
@@ -210,6 +212,19 @@ public class ControlRoom extends EventLoop{
 				int shouldHave=now-(client[i].startTime/1000);
 				int musthave=shouldHave-missed;
 				client[i].allIndex=musthave;
+			}
+			*/
+			for(int i=0;i<client.length;i++){
+				if(client[i]==null)
+					continue;
+				int now=(int)Scheduler.getInstance().now;
+				int missed=(client[i].joinTime-client[i].startTime);
+				if(now>(client[i].videoSize*1000)+(client[i].startTime)){
+					client[i].allIndex=client[i].videoSize-(missed/1000);
+					continue;
+				}
+				int mustHave=now-(client[i].joinTime);
+				client[i].allIndex=mustHave/1000;
 			}
 		
 			fillMCacheOverPeers();
@@ -249,6 +264,8 @@ public class ControlRoom extends EventLoop{
 			else
 			continue;
 		visual[3].add(pSlot3);
+		visual[6].add(pSlot3);
+		
 	}
 	void fillPScoreOverPeers(){
 		
