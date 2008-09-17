@@ -23,5 +23,6 @@ public interface Constants {
 	public static final char BUFFERMAP_REQUEST = 'r' ;
 	public static final char BUFFERMAP_RESPONSE = 'b';
 	public static final char GOSSIPING = 'g';
+	public static final char STABLEIZED = 'z';
 	
 }
