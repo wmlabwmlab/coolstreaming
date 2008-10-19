@@ -2,6 +2,7 @@ package simpipe.coolstreaming;
 
 import java.net.SocketAddress;
 
+import org.apache.log4j.Logger;
 import org.apache.mina.common.IoAcceptor;
 import org.apache.mina.common.IoHandlerAdapter;
 import org.apache.mina.common.IoServiceConfig;
@@ -74,7 +75,8 @@ public class PeerProtocol extends IoHandlerAdapter{
         switch(operation){
 	        // your deputy is X
 	        case Constants.DEPUTY_MESSAGE :
-	        	System.out.println("me "+node.port+" got "+msg+" , remainder"+node.deputyHops);
+	        	ControlRoom.logger.debug("me "+node.port+" got "+msg+" , remainder"+node.deputyHops);
+	        	//System.out.println("me "+node.port+" got "+msg+" , remainder"+node.deputyHops);
 	        	deputyMessage(msgPart2, session);
 	        	break;
 	        
@@ -85,7 +87,8 @@ public class PeerProtocol extends IoHandlerAdapter{
 	        
 	       	//I accept you as a partner of mine and you can have another partners which are [A-B-C-....]        	
 	        case Constants.PARTNERSHIP_ACCEPTANCE :
-	        	System.out.println("me "+node.port+" got "+msg+" , remainder"+node.deputyHops);
+	        	ControlRoom.logger.debug("me "+node.port+" got "+msg+" , remainder"+node.deputyHops);
+	        	//System.out.println("me "+node.port+" got "+msg+" , remainder"+node.deputyHops);
 	        	node.joinTime=(int)Scheduler.getInstance().now;
 	        	node.beginSceduling();
 	        	partnersMessage(msgPart2, session);	

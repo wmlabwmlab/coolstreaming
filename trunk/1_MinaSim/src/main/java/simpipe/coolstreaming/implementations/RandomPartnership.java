@@ -204,4 +204,10 @@ public class RandomPartnership implements Partnership {
     			result[i]=pCache[i].port;
     	return result;
     }
+	public void subscribe(char header){
+		
+	}
+	public void fire(char header){
+		
+	}
 }

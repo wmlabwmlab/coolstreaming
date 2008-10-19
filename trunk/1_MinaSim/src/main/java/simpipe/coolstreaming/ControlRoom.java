@@ -7,8 +7,11 @@ import java.util.Arrays;
 import javax.swing.plaf.basic.BasicScrollPaneUI.VSBChangeListener;
 
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
+import org.apache.log4j.SimpleLayout;
 
 import se.peertv.peertvsim.core.EventLoop;
 import se.peertv.peertvsim.core.Scheduler;
@@ -33,6 +36,7 @@ import org.apache.commons.math.stat.*;
 public class ControlRoom extends EventLoop{
 
 	
+	static Logger logger;
 	static int peerNumber=20;
 	static int sourceNumber=5;
 	static int creationRate = 500; // 1 client per 0.5 minute 
@@ -59,42 +63,21 @@ public class ControlRoom extends EventLoop{
 		ControlRoom m = new ControlRoom();		
 		m.createServer();
 		client=new PeerNode[peerNumber+sourceNumber];
-
-		
-		//int portStart=15;
-		//for(int i=0;i<sourceNumber;i++)	  //source
-		//	client[i]= new PeerNode(true,m.serverAddress,portStart+i); 
-		//portStart+=sourceNumber;
-		//for(int i=0;i < peerNumber;i++)
-		//	client[sourceNumber+i]= new PeerNode(false,m.serverAddress,portStart+i); //not source
-		
 		m.run();		
 	}	
 	
 	public void createClient(int time){
-		System.err.println("FIREEEEEEEEEEEEEEEEEEEE");
 		tracker.members.clearPartners();
-//		int peers[]=tracker.members.toArray();
-//		System.out.println("==========================================");
-//		System.out.println("My children are : ");
-//		for(int i=0;i<peers.length;i++)
-//			if(peers[i]!=0)
-//				System.out.println(peers[i]);
-//		try{
-//			Thread.sleep(3000);
-//		}
-//		catch(Exception e){}
-//		
 		if(maxPeers<peerNumber){
 			client[maxPeers]= new PeerNode(false,serverAddress,portStart+maxPeers);
 			maxPeers++;
-			System.err.println("New Peer "+portStart+maxPeers+" trying to connect at time: "+time);
+			
 		}
 		else{
 			if(maxPeers<(peerNumber+sourceNumber)){
 				client[maxPeers]= new PeerNode(true,serverAddress,portStart+maxPeers);
 				maxPeers++;
-				System.err.println("New Source "+portStart+maxPeers+" trying to connect at time: "+time);
+				
 			}
 		}
 		if(maxPeers<peerNumber+sourceNumber)
@@ -108,6 +91,13 @@ public class ControlRoom extends EventLoop{
 	
 	
 	public ControlRoom() {
+		
+		//init logger
+		Logger.getRootLogger().removeAllAppenders();
+		logger =Logger.getLogger("debugging_logger");
+		logger.setLevel((Level)Level.DEBUG);
+    	
+		
 		try{
 			Timer timer = new Timer(creationRate,this,"createClient",(int)Scheduler.getInstance().now+creationRate);
 		}
@@ -119,9 +109,10 @@ public class ControlRoom extends EventLoop{
 	
 	public void createServer() throws Exception{			
 		BasicConfigurator.configure();
-		Logger.getRootLogger().setLevel(Level.OFF);
+		Logger.getRootLogger().setLevel(Level.ALL);
 		serverAddress = new SimPipeAddress(Constants.SERVER_PORT);
 		tracker = new CentralNode(serverAddress,trackerCapacity);
+		
 	}
 	
 	
@@ -147,28 +138,31 @@ public class ControlRoom extends EventLoop{
 	 
 	 public  void displayEnd(){
 		 System.out.println("END");
-		 
+		 double threshold=1;
 		 for(int i=0;i<client.length;i++){
 			 if(client[i]==null)
 				 continue;
 			 if(!client[i].isSource)
-				 System.out.println("[Peer "+client[i].port+"] : Not source "+client[i].protocol.committed);
+				 logger.info("[Peer "+client[i].port+"] : Not source ");
 			 else
-				 System.out.println("[Peer "+client[i].port+"] : Source"+client[i].protocol.committed);
+				 logger.info("[Peer "+client[i].port+"] : Source");
 			 	 
 			 double CI=((double)client[i].continuityIndex)/((double)client[i].allIndex);
-			 System.out.println("continuity index = "+CI);
-			 System.out.print("My Partners are  : ");
-	    		for(int j=0;j<client[i].pSize;j++){
-	    			if(client[i].partners.getPartner(j)!=null)
-	    				System.out.print(" - "+(client[i].partners.getPartner(j).getPort()));
-	    		}
-	    		System.out.println("\n");
-	    		System.out.print("My Buffer Map : ");
-	    		for(int j=0;j<client[i].videoSize;j++)
-	    		System.out.print(client[i].scheduler.getWholeBits(j));
-	    		System.out.println("\n");
-	    		System.out.println("\n-----------------------------------------------");
+			 if(CI>threshold)
+				 CI=threshold;
+			 logger.info("continuity index = "+CI);
+			 String partners = "My Partners are  : ";
+			 for(int j=0;j<client[i].pSize;j++){
+	    		if(client[i].partners.getPartner(j)!=null)
+	    			partners+="  [ "+(client[i].partners.getPartner(j).getPort())+" ]";
+	    	 }
+			 logger.info(partners);
+			
+			String buffer="My Buffer Map : " ;
+	    	for(int j=0;j<client[i].videoSize;j++)
+	    	buffer+=client[i].scheduler.getWholeBits(j);
+	    	logger.info(buffer);
+	    	System.out.println("\n-----------------------------------------------");
 	   		 
 		 }
 		 
@@ -190,6 +184,7 @@ public class ControlRoom extends EventLoop{
 		 }
 		 new ViewApp(visual);
 		 System.err.println("---> "+counts);
+		 System.err.println("---> "+EventLoop.Count);
 	 }
 	 
 	@Override
@@ -199,29 +194,15 @@ public class ControlRoom extends EventLoop{
 		
 		
 		if(time%1000==0){
-			/*
-			for(int i=0;i<client.length;i++){
-				if(client[i]==null)
-					continue;
-				int now=(int)Scheduler.getInstance().now/1000;
-				int missed=(client[i].joinTime-client[i].startTime)/1000;
-				if(now>client[i].videoSize+(client[i].startTime/1000)){
-					client[i].allIndex=client[i].videoSize-missed;
-					continue;
-				}
-				int shouldHave=now-(client[i].startTime/1000);
-				int musthave=shouldHave-missed;
-				client[i].allIndex=musthave;
-			}
-			*/
 			for(int i=0;i<client.length;i++){
 				if(client[i]==null)
 					continue;
 				int now=(int)Scheduler.getInstance().now;
 				int missed=(client[i].joinTime-client[i].startTime);
 				if(now>(client[i].videoSize*1000)+(client[i].startTime)){
-					client[i].allIndex=client[i].videoSize-(missed/1000);
-					continue;
+					break;
+					//client[i].allIndex=client[i].videoSize-(missed/1000);
+					//continue;
 				}
 				int mustHave=now-(client[i].joinTime);
 				client[i].allIndex=mustHave/1000;
@@ -300,7 +281,7 @@ public class ControlRoom extends EventLoop{
 	}
 	
 	void fillContinuityIndex(){
-		
+		double threshold=1;
 		TimeSlot sSlot1 = new TimeSlot();
 		double CIs[] = new double[client.length]; 
 		for(int i=0;i<client.length;i++)
@@ -308,6 +289,9 @@ public class ControlRoom extends EventLoop{
 				double CI=(((double)client[i].continuityIndex)/((double)client[i].allIndex));
 				if(Double.isNaN(CI))
 					CI=1;
+				if(CI>threshold)
+					CI=threshold;
+				
 				CIs[i]=CI;
 			}
 		sSlot1.add(new DataStructure(CIs,""));

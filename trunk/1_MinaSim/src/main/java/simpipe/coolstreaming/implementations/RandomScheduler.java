@@ -259,6 +259,11 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 	public void setStartTime(int start){
 		startTime=start;
 	}
-	
+	public void subscribe(char header){
+		
+	}
+	public void fire(char header){
+		
+	}
 	
 }

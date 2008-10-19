@@ -19,4 +19,7 @@ public interface Scheduler {
 	int getDeadLine(int index);
 	int getExchangeTime();
 	void setStartTime(int start);
+	public void subscribe(char header);
+	public void fire(char header);
+	
 }

@@ -15,7 +15,7 @@ import se.peertv.peertvsim.conf.Conf;
 public abstract class EventLoop {
 
 	final static Scheduler scheduler = Scheduler.getInstance();	
-	
+	public static int Count=0;
 	long start;
 
 	//The following stuff is reported in stats
@@ -64,6 +64,7 @@ public abstract class EventLoop {
 				if (e != null && scheduler.now < Conf.MAX_SIMULATION_TIME) {
 					preEventExecution();
 					e.handle();
+					Count++;
 					if(postEventExecution()){
 						break;
 					}

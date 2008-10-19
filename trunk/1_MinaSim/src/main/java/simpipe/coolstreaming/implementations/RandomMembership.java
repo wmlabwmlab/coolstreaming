@@ -125,5 +125,10 @@ public class RandomMembership implements Membership {
 	public void setMember(int index,Member m){
 		 mCache[index]=m;
 	 }
-	
+	public void subscribe(char header){
+		
+	}
+	public void fire(char header){
+		
+	}
 }

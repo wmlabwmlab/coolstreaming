@@ -225,5 +225,11 @@ public class CoolStreamingScheduler implements simpipe.coolstreaming.interfaces.
 	public int getWholeBits(int index) {
 		return wholeBits[index];
 	}
+	public void subscribe(char header){
+		
+	}
+	public void fire(char header){
+		
+	}
 
 }

@@ -21,4 +21,6 @@ public interface Partnership {
 	int[] toArray();
 	int getLength();
 	Partner[] getCache();
+	public void subscribe(char header);
+	public void fire(char header);
 }
