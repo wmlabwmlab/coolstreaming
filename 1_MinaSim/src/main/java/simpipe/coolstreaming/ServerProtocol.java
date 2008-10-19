@@ -30,8 +30,7 @@ public class ServerProtocol extends IoHandlerAdapter {
 	}
 	
 	public void sessionCreated(IoSession session) throws Exception {
-
-    	System.out.println("Server says : \" new peer number "+session.getRemoteAddress().toString()+" Created !! \"");	
+    	
     }
 
     public void sessionClosed(IoSession session) {
@@ -44,8 +43,8 @@ public class ServerProtocol extends IoHandlerAdapter {
     		    String messageContent=(String)message;
     		    String []parameters=messageContent.split(Constants.MESSAGE_SEPARATOR);
     			int newPeer=Integer.parseInt(parameters[1]);
-    		    System.out.println("got "+newPeer);
-    		    
+    		    ControlRoom.logger.info(newPeer+" is joining the network");
+    			//System.out.println("got "+newPeer);
     		    int port=node.members.getAnotherDeputy(newPeer);
     			if(newPeer==port)
     		    node.members.addPartner(newPeer,session,node.isTracker);
@@ -61,7 +60,6 @@ public class ServerProtocol extends IoHandlerAdapter {
 		    String []parameters=messageContent.split(Constants.MESSAGE_SEPARATOR);
 			int peer=Integer.parseInt(parameters[1]);
 		    System.out.println(peer+" requesting new friends");
-		    
 		    int port=node.members.getAnotherDeputy(peer);
 			session.write(""+Constants.DEPUTY_MESSAGE+port);
     	}
@@ -70,7 +68,8 @@ public class ServerProtocol extends IoHandlerAdapter {
     		String messageContent=(String)message;
 		    String []parameters=messageContent.split(Constants.MESSAGE_SEPARATOR);
 			int peer=Integer.parseInt(parameters[1]);
-			System.err.println(peer+" STABLEIZZZZZZZZZED");
+			ControlRoom.logger.debug(peer+" STABLEIZED");
+			//System.err.println(peer+" STABLEIZZZZZZZZZED");
 			rempovePartner(peer);
 			node.members.addPartner(peer,session,node.isTracker);
 			

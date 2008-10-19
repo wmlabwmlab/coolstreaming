@@ -24,13 +24,15 @@ public class PeerNode extends Node {
 		this.port=port;
     }
     int i=0;
-    int deputyCall=0;
+
     public void reboot(int dull){ 
     	
     	if((this.searching||partners.getLength()==0)&&i++==4){
     		this.deputyHops=4;
     		protocol.connectTo(0);
-    		System.err.println("REBOOOOT "+port);
+    		i=0;
+    		ControlRoom.logger.warn(port+ " will Reboot now");
+    		//System.err.println("REBOOOOT "+port);
     	}
     	else{
     		int size= partners.clearPartners();

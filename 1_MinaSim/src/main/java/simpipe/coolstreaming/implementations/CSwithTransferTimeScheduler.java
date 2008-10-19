@@ -238,5 +238,11 @@ public class CSwithTransferTimeScheduler implements simpipe.coolstreaming.interf
 		return wholeBits[index];
 	}
 
+	public void subscribe(char header){
+		
+	}
+	public void fire(char header){
+		
+	}
 }
 

@@ -13,6 +13,6 @@ public interface Membership {
 	int[] toArray();
 	void setMember(int index,Member m);
 	Member getMember(int index);
-	
-	
+	public void subscribe(char header);
+	public void fire(char header);
 }
