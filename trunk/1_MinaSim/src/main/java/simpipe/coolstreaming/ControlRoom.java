@@ -1,9 +1,15 @@
 
 package simpipe.coolstreaming;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Properties;
 
+import javax.swing.JOptionPane;
 import javax.swing.plaf.basic.BasicScrollPaneUI.VSBChangeListener;
 
 import org.apache.log4j.BasicConfigurator;
@@ -16,6 +22,7 @@ import org.apache.log4j.SimpleLayout;
 import se.peertv.peertvsim.core.EventLoop;
 import se.peertv.peertvsim.core.Scheduler;
 import se.peertv.peertvsim.core.Timer;
+import se.peertv.peertvsim.thread.Thread;
 import simpipe.SimPipeAddress;
 import simpipe.coolstreaming.implementations.Partner;
 import simpipe.coolstreaming.visualization.ContinuityIndex;
@@ -31,18 +38,31 @@ import simpipe.coolstreaming.visualization.ViewApp;
 import simpipe.coolstreaming.visualization.Visualization;
 
 import org.apache.commons.math.stat.*;
+import org.hamcrest.core.IsAnything;
 
 
 public class ControlRoom extends EventLoop{
 
 	
+	//Static automated variables
+	public static boolean isAutomated=false;
+	public static int peers=25;
+	public static int seeds=30;
+	public static int windowSize=30;
+	public static int slack=3;
+	public static int segment=1;
+	public static int exchange=30000;
+	public static String filename="outputs/CI.properties";
+	public static String input="exp";
+	
+	
 	static Logger logger;
-	static int peerNumber=20;
-	static int sourceNumber=5;
-	static int creationRate = 500; // 1 client per 0.5 minute 
-	static int portStart=15;
-	final static boolean 	SIM_MODE = true;
+	int peerNumber=20;
+	int sourceNumber=5;
+	int creationRate = 500; // 1 client per 0.5 minute 
+	int portStart=15;
 	int trackerCapacity=300;
+	ArrayList<Double> ciBuffer = new ArrayList<Double>();
 	
 	int time=(int)se.peertv.peertvsim.conf.Conf.MAX_SIMULATION_TIME/1000;
 	double average[]=new double[time+10];
@@ -50,20 +70,66 @@ public class ControlRoom extends EventLoop{
 	int index=0;
 	
 	SocketAddress serverAddress;
-	static PeerNode client[];
-	static CentralNode tracker;
+	PeerNode client[];
+	CentralNode tracker;
 	Visualization visual[];
 	
-	static int maxPeers=0;
+	
+	int maxPeers=0;
 	int[]empty={};
 	
 	public static int counts=0;
 	
+	public ControlRoom() {
+		
+		//init logger
+		Logger.getRootLogger().removeAllAppenders();
+		logger =Logger.getLogger("debugging_logger");
+		logger.setLevel((Level)Level.DEBUG);
+    	
+		
+		try{
+			Timer timer = new Timer(creationRate,this,"createClient",(int)Scheduler.getInstance().now+creationRate);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+		displayBegin();
+	}
+	
 	public static void main(String[] args) throws Exception {
+		
 		ControlRoom m = new ControlRoom();		
+		int size = args.length;
+		if(size>0){
+			m.isAutomated=true;
+			Properties properties = new Properties();
+		    try {
+		        properties.load(new FileInputStream(args[0]));
+		        peers=Integer.parseInt((String)properties.get("peers"));
+		        seeds=Integer.parseInt((String)properties.get("seeds"));
+		        windowSize=Integer.parseInt((String)properties.get("window"));
+		        slack=Integer.parseInt((String)properties.get("slack"));
+		        exchange=Integer.parseInt((String)properties.get("exchangeTime"));
+		        segment=Integer.parseInt((String)properties.get("segment"));
+		        input=args[0];
+		        
+		        m.peerNumber=peers;
+		        m.sourceNumber=seeds;
+		        
+		    } 
+		    catch (IOException e) {
+		    }
+		    
+		}
 		m.createServer();
-		client=new PeerNode[peerNumber+sourceNumber];
-		m.run();		
+		m.client=new PeerNode[m.peerNumber+m.sourceNumber];
+		m.run();
+		
+		if(!m.isAutomated){
+			logger.setLevel(Level.TRACE);
+			logger = Logger.getLogger("logger222");
+		}
 	}	
 	
 	public void createClient(int time){
@@ -90,23 +156,6 @@ public class ControlRoom extends EventLoop{
 	}
 	
 	
-	public ControlRoom() {
-		
-		//init logger
-		Logger.getRootLogger().removeAllAppenders();
-		logger =Logger.getLogger("debugging_logger");
-		logger.setLevel((Level)Level.DEBUG);
-    	
-		
-		try{
-			Timer timer = new Timer(creationRate,this,"createClient",(int)Scheduler.getInstance().now+creationRate);
-		}
-		catch(Exception e){
-			e.printStackTrace();
-		}
-		displayBegin();
-	}
-	
 	public void createServer() throws Exception{			
 		BasicConfigurator.configure();
 		Logger.getRootLogger().setLevel(Level.ALL);
@@ -119,6 +168,7 @@ public class ControlRoom extends EventLoop{
 	public  void displayBegin(){
 		 
 		 System.out.println("Begin");
+	   if(!isAutomated){
 		 visual = new Visualization[7];
 		 visual[0] = new MCacheOverPeers();
 		 visual[1] = new PScoreOverPeers();
@@ -127,6 +177,7 @@ public class ControlRoom extends EventLoop{
 		 visual[4] = new ContinuityIndex();
 		 visual[5]= new PAverageOverTime();
 		 visual[6] = new NetworkVisualization();	
+		}
 	 }
 	 
 	 @Override
@@ -139,6 +190,7 @@ public class ControlRoom extends EventLoop{
 	 public  void displayEnd(){
 		 System.out.println("END");
 		 double threshold=1;
+		 if(!isAutomated){
 		 for(int i=0;i<client.length;i++){
 			 if(client[i]==null)
 				 continue;
@@ -163,7 +215,8 @@ public class ControlRoom extends EventLoop{
 	    	buffer+=client[i].scheduler.getWholeBits(j);
 	    	logger.info(buffer);
 	    	System.out.println("\n-----------------------------------------------");
-	   		 
+	   		
+	    	
 		 }
 		 
 		 visual[0].set("Membership's cache visualization","Peer ID","Number of Members");
@@ -185,6 +238,32 @@ public class ControlRoom extends EventLoop{
 		 new ViewApp(visual);
 		 System.err.println("---> "+counts);
 		 System.err.println("---> "+EventLoop.Count);
+		 
+		 tracker.protocol.acceptor.unbindAll();
+		 for(int i=0;i<client.length;i++){
+			 client[i].protocol.disconnect();
+		 }
+		 }
+		 else{
+			 double sum=0;
+			 for(int i=0;i<ciBuffer.size();i++){
+				 Double ci= ciBuffer.get(i);
+				 sum+=ci.doubleValue();
+			 }
+			 double AVG = sum/ciBuffer.size();
+			 System.err.println(AVG);
+			 Properties properties= new Properties();
+			 try {
+				 properties.load(new FileInputStream(filename));
+			     properties.setProperty(input,new Double(AVG).toString());
+			     properties.store(new FileOutputStream(filename),"append");
+			        
+			    } 
+			 catch (IOException e) {
+			   }
+
+			 
+		 }
 	 }
 	 
 	@Override
@@ -207,19 +286,57 @@ public class ControlRoom extends EventLoop{
 				int mustHave=now-(client[i].joinTime);
 				client[i].allIndex=mustHave/1000;
 			}
-		
+			if(!isAutomated){
 			fillMCacheOverPeers();
 			fillPCacheOverPeers();
 			fillPScoreOverPeers();
 			fillPScoreOverNetwork();
 			fillContinuityIndex();
 			partnershipStat();
-	
+			}
+			else{
+				collectCI();
+			}
 		}
 		
 		return false;
 	}
 
+	void collectCI(){
+		double threshold=1;
+		TimeSlot sSlot1 = new TimeSlot();
+		double CIs[] = new double[client.length]; 
+		for(int i=0;i<client.length;i++)
+			if(client[i]!=null){
+				double CI=(((double)client[i].continuityIndex)/((double)client[i].allIndex));
+				if(Double.isNaN(CI))
+					CI=1;
+				if(CI>threshold)
+					CI=threshold;
+				
+				CIs[i]=CI;
+			}
+			else {
+				CIs[i]=-1;
+			}
+		double sum=0;
+		int count=0;
+		for(int i=0;i<CIs.length;i++)
+		{
+			if(CIs[i]!=-1){
+				sum+=CIs[i];
+				count++;
+			}
+		}
+		if (count==0)
+			return;
+		Double avg = new Double(sum/count);
+		ciBuffer.add(avg);
+
+	}
+	
+	
+	
 	void fillMCacheOverPeers(){
 		
 		TimeSlot mSlot1=new TimeSlot();

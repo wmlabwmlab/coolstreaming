@@ -16,6 +16,7 @@ import simpipe.SimPipeConnector;
 
 public class PeerProtocol extends IoHandlerAdapter{
 
+	IoAcceptor acceptor;
 	private PeerNode node;
     private boolean bootStraping=true;
     public int committed=0;
@@ -27,6 +28,10 @@ public class PeerProtocol extends IoHandlerAdapter{
 		connector.connect(serverAddress, this);
 	}
 
+	void disconnect(){
+		acceptor.unbindAll();
+	}
+	
 	public void sessionCreated(IoSession session) throws Exception {
 		
     	if(bootStraping){
@@ -36,7 +41,6 @@ public class PeerProtocol extends IoHandlerAdapter{
 			node.serverBond=session;
     		int listenPort=node.port+ Constants.SERVER_PORT;
 			IoServiceConfig config;
-			IoAcceptor acceptor;
 			acceptor = new SimPipeAcceptor();
 			config = acceptor.getDefaultConfig();
 			SocketAddress serverAddress = new SimPipeAddress(listenPort);

@@ -15,11 +15,11 @@ public class ServerProtocol extends IoHandlerAdapter {
 
 	private CentralNode node;
 	ArrayList<Partner> temp=new ArrayList<Partner>();
+	IoAcceptor acceptor;
 	
 	public ServerProtocol(SocketAddress serverAddress,CentralNode node){
 		this.node = node; 
 		IoServiceConfig config;
-		IoAcceptor acceptor;
 		acceptor = new SimPipeAcceptor();
 		config = acceptor.getDefaultConfig();
 		try{
