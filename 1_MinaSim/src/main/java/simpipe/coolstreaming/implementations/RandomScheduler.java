@@ -4,6 +4,7 @@ import se.peertv.peertvsim.core.Scheduler;
 import se.peertv.peertvsim.core.Timer;
 import simpipe.coolstreaming.BitField;
 import simpipe.coolstreaming.Constants;
+import simpipe.coolstreaming.ControlRoom;
 import simpipe.coolstreaming.PeerNode;
 
 /*
@@ -23,10 +24,20 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 	private int timeSlot;
 	private boolean requesting=false;
     
+	
 	public RandomScheduler(){
-		
+		if(ControlRoom.isAutomated){
+			slack=ControlRoom.slack;
+			exchangeTime = ControlRoom.exchange;
+		}
 	}
 	public RandomScheduler(PeerNode node, int startTime){
+		
+		if(ControlRoom.isAutomated){
+			slack=ControlRoom.slack;
+			exchangeTime = ControlRoom.exchange;
+			node.setWindowSize(ControlRoom.windowSize);
+		}
 		this.node=node;
 		this.startTime = startTime;
 		fillDeadLine();
