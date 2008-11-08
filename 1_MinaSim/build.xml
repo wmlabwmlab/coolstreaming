@@ -1,0 +1,48 @@
+<project name="CoolStreaming" default="build-both" basedir="." xmlns:artifact="urn:maven-artifact-ant">
+<path id="build.classpath">
+      
+      <fileset dir="lib/" >
+    		<include name="**/*.jar" />
+  	  </fileset>
+  	  
+ </path>
+ 
+ <property name="build.classpath"   value="bin"/>
+ <property name="mainpackage" value="simpipe.coolstreaming"/>
+ <property name="filename" value="${file}"/> 
+ 
+ <target name="initTaskDefs">
+  	<xmlproperty file="pom.xml" prefix="pom.xml" />
+
+    <path id="maven-ant-tasks.classpath" path="maven-ant-tasks-2.0.9.jar" />
+    <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant"
+             classpathref="maven-ant-tasks.classpath"/>
+
+    <artifact:localRepository id="local.repository" path="${basedir}/target/local-repo" layout="default"/>
+
+    <property name="deploy.repository.url" value="${basedir}/target/deployment-repo" />
+    <artifact:remoteRepository id="deploy.repository" url="file://localhost/${deploy.repository.url}" layout="default"/>
+
+    <artifact:pom file="pom.xml" id="maven.project"/>
+    
+    
+    
+  </target>
+
+ 
+<target name="run" depends="initTaskDefs">
+        <artifact:dependencies filesetId="maven-ant-tasks.dependency.fileset" pathId="dependency.classpath">
+       		<pom refid="maven.project"/>
+       	</artifact:dependencies>
+        <java classpath="target/classes" classname="${mainpackage}.ControlRoom" fork="true" args="${file}">
+        	<classpath refid="build.classpath" />
+        	<classpath refid="dependency.classpath" />
+        </java>
+        
+</target>
+
+
+</project>
+
+
+

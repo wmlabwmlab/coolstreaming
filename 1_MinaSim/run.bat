@@ -1,0 +1,1 @@
+FOR %%i IN (inputs\*.properties) DO ant -Dfile=%%i run 
