@@ -4,13 +4,13 @@
 	<bean id="current_partner" class="simpipe.coolstreaming.implementations.RandomPartnership" />
 	<bean id="current_member" class="simpipe.coolstreaming.implementations.RandomMembership" />
 	<bean id="current_scheduler" class="simpipe.coolstreaming.implementations.RandomScheduler" />    
-	<bean id="CoolStreamingScheduler" class="simpipe.coolstreaming.implementations.CSwithTransferTimeScheduler" />    
-	
+	<bean id="CoolStreamingSchedulerWithTT" class="simpipe.coolstreaming.implementations.CSwithTransferTimeScheduler" />    
+	<bean id="CoolStreamingScheduler" class="simpipe.coolstreaming.implementations.CoolStreamingScheduler" />
 
 	<bean id="app_bean" class="simpipe.coolstreaming.Package">
 		<property name="partners" ref="current_partner" />
 		<property name="members" ref="current_member"/>
-		<property name="scheduler" ref="current_scheduler"/>
+		<property name="scheduler" ref="CoolStreamingScheduler"/>
 	</bean>
 
 </beans>

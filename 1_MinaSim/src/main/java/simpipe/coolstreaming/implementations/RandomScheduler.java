@@ -53,6 +53,11 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 	
 	@Override
 	public void setParams(PeerNode node, int startTime) {
+		if(ControlRoom.isAutomated){
+			slack=ControlRoom.slack;
+			exchangeTime = ControlRoom.exchange;
+			node.setWindowSize(ControlRoom.windowSize);
+		}
 		this.node=node;
 		this.startTime = startTime;
 		fillDeadLine();
@@ -112,7 +117,7 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
     	int secondNow=milliesNow/1000;
     	timeSlot = milliesNow;
     	for(int i=0;i<node.getVideoSize();i++)
-	    	if(wholeBits[i]==0&&deadLine[i]<secondNow){
+	    	if(wholeBits[i]==0&&deadLine[i]<=secondNow){
 	    		timeSlot=startTime+(i*1000);
 	    		break;
 	    	}
@@ -180,6 +185,7 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 			length=0;
 			
 		}
+		
 		return field;
 	}
 	

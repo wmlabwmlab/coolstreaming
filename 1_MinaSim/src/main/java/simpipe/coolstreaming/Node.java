@@ -31,7 +31,7 @@ public class Node {
   
   //Video parameters
     int windowSize=30;	//30 sec
-    int videoSize=500;  //used to be 120sec 
+    int videoSize=570;  //used to be 120sec 
     int segmentSize=256; //256 Kb = 32 KB for one sec
     BitField myBuffer;
 
