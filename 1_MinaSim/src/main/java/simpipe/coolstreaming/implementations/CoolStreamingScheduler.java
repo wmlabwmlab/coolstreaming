@@ -5,6 +5,7 @@ import se.peertv.peertvsim.core.Timer;
 import se.peertv.peertvsim.core.Scheduler;
 import simpipe.coolstreaming.BitField;
 import simpipe.coolstreaming.Constants;
+import simpipe.coolstreaming.ControlRoom;
 import simpipe.coolstreaming.PeerNode;
 
 import java.util.ArrayList;
@@ -186,6 +187,11 @@ public class CoolStreamingScheduler implements simpipe.coolstreaming.interfaces.
 
 	@Override
 	public void setParams(PeerNode node, int startTime) {
+		if(ControlRoom.isAutomated){
+			slack=ControlRoom.slack;
+			exchangeTime = ControlRoom.exchange;
+			node.setWindowSize(ControlRoom.windowSize);
+		}
 		this.node=node;
 		this.startTime = startTime;
 		fillDeadLine();
