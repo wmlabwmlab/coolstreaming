@@ -101,6 +101,8 @@ public class ContinuityIndex extends Visualization{
 			prev.setEnabled(false);
 		if(time>=slots.size()-1){
 			time=slots.size()-1;
+			index=slots.size()-1;
+			System.err.println("max CI is"+slots.size());
 			next.setEnabled(false);
 		}
 		

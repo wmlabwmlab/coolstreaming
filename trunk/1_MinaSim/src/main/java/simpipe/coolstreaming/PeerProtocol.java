@@ -321,9 +321,12 @@ public class PeerProtocol extends IoHandlerAdapter{
 		int index=Integer.parseInt(msgPart2);
 		
 		if(node.scheduler.getWholeBits(index)!=1){
-		if(node.scheduler.getDeadLine(index)<=(Scheduler.getInstance().now/1000))
+			if(node.port==18)
+				System.err.println("segment: "+index+" ( now= "+Scheduler.getInstance().now/1000+" - deadline= "+node.scheduler.getDeadLine(index)+" )");
+		if(node.scheduler.getDeadLine(index)>=(Scheduler.getInstance().now/1000)){
 			node.continuityIndex++;
-    	node.scheduler.setWholeBits(index,1);
+			node.scheduler.setWholeBits(index,1);
+		}
 		}
 	}
 	

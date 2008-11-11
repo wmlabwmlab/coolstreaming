@@ -5,6 +5,7 @@ import se.peertv.peertvsim.core.Timer;
 import se.peertv.peertvsim.core.Scheduler;
 import simpipe.coolstreaming.BitField;
 import simpipe.coolstreaming.Constants;
+import simpipe.coolstreaming.ControlRoom;
 import simpipe.coolstreaming.PeerNode;
 
 import java.util.ArrayList;
@@ -21,8 +22,8 @@ public class CSwithTransferTimeScheduler implements simpipe.coolstreaming.interf
 	private int wholeBits[];
 	private int deadLine[];
 //	private int supplier[];
-	private int slack=2;
-	private int exchangeTime=30000;//request map every 30 sec
+	private int slack=10;
+	private int exchangeTime=10000;//request map every 30 sec
 	private int timeSlot;
 	private boolean requesting=false;
 	
@@ -38,7 +39,7 @@ public class CSwithTransferTimeScheduler implements simpipe.coolstreaming.interf
 
 	@Override
 	public boolean isValid(int index, int timeNow) {
-		if(deadLine[index]<timeNow)
+		if(deadLine[index]<=timeNow)
 			return true;
 		return false;
 	}
@@ -91,7 +92,7 @@ public class CSwithTransferTimeScheduler implements simpipe.coolstreaming.interf
 					if(pos!=-1 && T[pos][dupSet[nlength].get(i)]>node.getSegmentSize()/node.getPartners().getPartner(pos).bandwidth){
 						bandwidth[counter]=node.getPartners().getPartner(pos).bandwidth;}
 					else
-					bandwidth[counter]=0; //node.defaultBandwidth;
+					bandwidth[counter]=node.getDefaultBandwidth(); //node.defaultBandwidth;
 				}
 				int supplier=pickPeer(bandwidth);
 				if (node.getPartners().getPartner(node.getPartners().getIndex(tempSupplierSet[dupSet[nlength].get(i)].get(supplier))).bandwidth !=0){
@@ -198,6 +199,11 @@ public class CSwithTransferTimeScheduler implements simpipe.coolstreaming.interf
 
 	@Override
 	public void setParams(PeerNode node, int startTime) {
+		if(ControlRoom.isAutomated){
+			slack=ControlRoom.slack;
+			exchangeTime = ControlRoom.exchange;
+			node.setWindowSize(ControlRoom.windowSize);
+		}
 		this.node=node;
 		this.startTime = startTime;
 		fillDeadLine();

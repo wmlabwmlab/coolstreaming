@@ -21,8 +21,8 @@ public class CoolStreamingScheduler implements simpipe.coolstreaming.interfaces.
 	private int wholeBits[];
 	private int deadLine[];
 	//private int supplier[];
-	private int slack=2;
-	private int exchangeTime=30000;//request map every 30 sec
+	private int slack=10;
+	private int exchangeTime=10000;//request map every 30 sec
 	private int timeSlot;
 	private boolean requesting=false;
 	

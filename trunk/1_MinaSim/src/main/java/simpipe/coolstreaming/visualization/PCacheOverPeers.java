@@ -101,6 +101,7 @@ public class PCacheOverPeers extends  Visualization{
 			prev.setEnabled(false);
 		if(time>=slots.size()-1){
 			time=slots.size()-1;
+			index=slots.size()-1;
 			next.setEnabled(false);
 		}
 		

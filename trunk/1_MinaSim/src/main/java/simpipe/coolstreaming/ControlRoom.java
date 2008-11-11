@@ -63,6 +63,8 @@ public class ControlRoom extends EventLoop{
 	int portStart=15;
 	int trackerCapacity=300;
 	ArrayList<Double> ciBuffer = new ArrayList<Double>();
+	int snapShotRate=1000; //1 sec
+	
 	
 	int time=(int)se.peertv.peertvsim.conf.Conf.MAX_SIMULATION_TIME/1000;
 	double average[]=new double[time+10];
@@ -238,7 +240,7 @@ public class ControlRoom extends EventLoop{
 		 new ViewApp(visual);
 		 System.err.println("---> "+counts);
 		 System.err.println("---> "+EventLoop.Count);
-		 
+		 System.err.println("---> "+slotcount);
 		 tracker.protocol.acceptor.unbindAll();
 		 for(int i=0;i<client.length;i++){
 			 client[i].protocol.disconnect();
@@ -265,20 +267,33 @@ public class ControlRoom extends EventLoop{
 			 
 		 }
 	 }
-	 
+	 boolean postTimer=true;
 	@Override
 	protected boolean postEventExecution() {
 		
 		int time =(int)Scheduler.getInstance().now;
-		
-		
-		if(time%1000==0){
+		if(time%1000==0)
+		if(postTimer){
+			postTimer=false;
+			gatherInfo(0);
+		}
+		return false;
+	}
+	int slotcount=0;
+	public void gatherInfo(int dull){
+			slotcount++;
 			for(int i=0;i<client.length;i++){
 				if(client[i]==null)
 					continue;
 				int now=(int)Scheduler.getInstance().now;
 				int missed=(client[i].joinTime-client[i].startTime);
-				if(now>(client[i].videoSize*1000)+(client[i].startTime)){
+				if(i==8){
+					
+					System.err.println("now="+Scheduler.getInstance().now+" , join= "+client[i].joinTime+" , vsize+starttime= "+((client[i].videoSize*1000)+(client[i].startTime)));
+				}
+				if(now>((client[i].videoSize*1000)+(client[i].startTime))){
+				
+						System.err.println("BREAAAAKKKKKK");
 					break;
 					//client[i].allIndex=client[i].videoSize-(missed/1000);
 					//continue;
@@ -297,9 +312,12 @@ public class ControlRoom extends EventLoop{
 			else{
 				collectCI();
 			}
-		}
-		
-		return false;
+			try{
+				Timer timer = new Timer(snapShotRate,this,"gatherInfo",0);
+			}
+			catch(Exception e){
+				e.printStackTrace();
+			}
 	}
 
 	void collectCI(){
