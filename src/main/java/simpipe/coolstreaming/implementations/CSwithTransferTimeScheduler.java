@@ -1,5 +1,6 @@
 package simpipe.coolstreaming.implementations;
 
+import se.peertv.peertvsim.SimulableSystem;
 import se.peertv.peertvsim.core.Timer;
 //import simpipe.coolstreaming.interfaces.Scheduler;
 import se.peertv.peertvsim.core.Scheduler;
@@ -49,7 +50,7 @@ public class CSwithTransferTimeScheduler implements simpipe.coolstreaming.interf
 		BitField field = new BitField(node.getWindowSize());
 		ArrayList<Integer> dupSet [] =new ArrayList[node.getPSize()+1];
 		ArrayList<Integer> tempSupplierSet [] =new ArrayList[node.getWindowSize()];
-		int timeNow=(int)Scheduler.getInstance().now;
+		int timeNow=(int)SimulableSystem.currentTimeMillis();
 		BitField window=new BitField(node.getWindowSize());
 		window=getWindow(timeSlot); 
 		int T[][]=new int [node.getPSize()][node.getWindowSize()];
@@ -109,8 +110,8 @@ public class CSwithTransferTimeScheduler implements simpipe.coolstreaming.interf
 	}
 
 	@Override
-	public void exchangeBM(int dull) {
-		int milliesNow=(int)Scheduler.getInstance().now;	
+	public void exchangeBM() {
+		int milliesNow=(int)SimulableSystem.currentTimeMillis();	
     	//int secondNow=milliesNow/1000;
     	timeSlot = milliesNow;
     	/*for(int i=0;i<node.videoSize;i++)
@@ -123,12 +124,14 @@ public class CSwithTransferTimeScheduler implements simpipe.coolstreaming.interf
     		if(node.getPartners().getPartner(i)!=null){
     		node.getPartners().getPartner(i).session.write(""+Constants.BUFFERMAP_REQUEST+timeSlot);
    		}
-    	
-    	try {
-			new Timer(exchangeTime,this,"exchangeBM",0);
-		} catch (Exception e) {
-		e.printStackTrace();
-		}
+		/*
+		 * this section has been commented to import the new sim
+		 */    	
+//    	try {
+//			new Timer(exchangeTime,this,"exchangeBM",0);
+//		} catch (Exception e) {
+//		e.printStackTrace();
+//		}
 	}
 	
 	@Override

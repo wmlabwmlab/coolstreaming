@@ -21,7 +21,7 @@ public class RandomPartnership implements Partnership {
     PeerNode node;
     int pSize=0;
     
-    RandomPartnership(){
+    public RandomPartnership(){
     	
     }
     public RandomPartnership(int pSize,int port,int windowSize,int defaultBandwidth, PeerNode node ){
@@ -113,8 +113,8 @@ public class RandomPartnership implements Partnership {
     
 	@Override
 	public synchronized int getAnotherDeputy(int destPort){ 
-			
-			if(getLength()==0)
+//modified during the impoting of new sim			
+			if(getLength()==0 || (getLength() == 1 && getIndex(destPort) != -1))
 				return destPort;
 			
 			int[] temp=null;

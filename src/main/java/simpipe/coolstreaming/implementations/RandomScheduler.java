@@ -1,5 +1,6 @@
 package simpipe.coolstreaming.implementations;
 
+import se.peertv.peertvsim.SimulableSystem;
 import se.peertv.peertvsim.core.Scheduler;
 import se.peertv.peertvsim.core.Timer;
 import simpipe.coolstreaming.BitField;
@@ -111,9 +112,9 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 	
 	 // the BitMap's timer's firing function 
 	@Override
-    public void exchangeBM(int dull){ 
+    public void exchangeBM(){ 
     	
-    	int milliesNow=(int)Scheduler.getInstance().now;	
+    	int milliesNow=(int)SimulableSystem.currentTimeMillis();	
     	int secondNow=milliesNow/1000;
     	timeSlot = milliesNow;
     	for(int i=0;i<node.getVideoSize();i++)
@@ -126,12 +127,14 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
     		if(node.getPartners().getPartner(i)!=null){
     		node.getPartners().getPartner(i).session.write(""+Constants.BUFFERMAP_REQUEST+timeSlot);
    		}
-    	
-    	try {
-			new Timer(exchangeTime,this,"exchangeBM",0);
-		} catch (Exception e) {
-		e.printStackTrace();
-		}
+		/*
+		 * this section has been commented to import the new sim
+		 */    	
+//    	try {
+//			new Timer(exchangeTime,this,"exchangeBM",0);
+//		} catch (Exception e) {
+//		e.printStackTrace();
+//		}
     }
     
 	@Override
@@ -139,7 +142,7 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 		BitField field = new BitField(node.getWindowSize());
 		int index=0;
 		int length=0;
-		int timeNow=(int)Scheduler.getInstance().now;
+		int timeNow=(int)SimulableSystem.currentTimeMillis();
 		for(int i=0;i<node.getWindowSize();i++){
 			for(int j=0;j<node.getPSize();j++){
 				if(node.getPartners().getPartner(j)==null)
