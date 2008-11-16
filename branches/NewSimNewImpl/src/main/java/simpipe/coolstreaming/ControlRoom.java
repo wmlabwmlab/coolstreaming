@@ -8,6 +8,7 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JOptionPane;
 import javax.swing.plaf.basic.BasicScrollPaneUI.VSBChangeListener;
@@ -19,11 +20,12 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.SimpleLayout;
 
+import se.peertv.peertvsim.SimulableSystem;
 import se.peertv.peertvsim.core.EventLoop;
 import se.peertv.peertvsim.core.Scheduler;
-import se.peertv.peertvsim.core.Timer;
-import se.peertv.peertvsim.thread.Thread;
-import simpipe.SimPipeAddress;
+import se.peertv.peertvsim.executor.SchedulingExecutor;
+//import se.peertv.peertvsim.thread.Thread;
+import simpipe.base.support.SimPipeAddress;
 import simpipe.coolstreaming.implementations.Partner;
 import simpipe.coolstreaming.visualization.ContinuityIndex;
 import simpipe.coolstreaming.visualization.DataStructure;
@@ -39,6 +41,7 @@ import simpipe.coolstreaming.visualization.Visualization;
 
 import org.apache.commons.math.stat.*;
 import org.hamcrest.core.IsAnything;
+import org.springframework.scheduling.SchedulingException;
 
 
 public class ControlRoom extends EventLoop{
@@ -75,7 +78,7 @@ public class ControlRoom extends EventLoop{
 	PeerNode client[];
 	CentralNode tracker;
 	Visualization visual[];
-	
+	private SchedulingExecutor executor;
 	
 	int maxPeers=0;
 	int[]empty={};
@@ -87,15 +90,24 @@ public class ControlRoom extends EventLoop{
 		//init logger
 		Logger.getRootLogger().removeAllAppenders();
 		logger =Logger.getLogger("debugging_logger");
-		logger.setLevel((Level)Level.DEBUG);
-    	
+		logger.setLevel((Level)Level.ERROR);
+		executor = new SchedulingExecutor(1234);
+/*
+ * this section is modified to import new sim
+*/
 		
-		try{
-			Timer timer = new Timer(creationRate,this,"createClient",(int)Scheduler.getInstance().now+creationRate);
-		}
-		catch(Exception e){
-			e.printStackTrace();
-		}
+//		try{
+//			Timer timer = new Timer(creationRate,this,"createClient",(int)SimulableSystem.currentTimeMillis()+creationRate);
+//		}
+//		catch(Exception e){
+//			e.printStackTrace();
+//		}
+		executor.scheduleAtFixedRate(new Runnable(){	public void run(){
+																	createClient();
+										}},
+										creationRate,
+										creationRate,
+										TimeUnit.MICROSECONDS,peerNumber+sourceNumber);
 		displayBegin();
 	}
 	
@@ -134,7 +146,7 @@ public class ControlRoom extends EventLoop{
 		}
 	}	
 	
-	public void createClient(int time){
+	public void createClient(){
 		tracker.members.clearPartners();
 		if(maxPeers<peerNumber){
 			client[maxPeers]= new PeerNode(false,serverAddress,portStart+maxPeers);
@@ -148,13 +160,17 @@ public class ControlRoom extends EventLoop{
 				
 			}
 		}
-		if(maxPeers<peerNumber+sourceNumber)
-		try{
-			Timer timer = new Timer(creationRate,this,"createClient",(int)Scheduler.getInstance().now+creationRate);
-		}
-		catch(Exception e){
-			e.printStackTrace();
-		}
+		/*
+		 * this section is modified to import new sim
+		*/
+		
+//		if(maxPeers<peerNumber+sourceNumber)
+//		try{
+//			Timer timer = new Timer(creationRate,this,"createClient",(int)SimulableSystem.currentTimeMillis()+creationRate);
+//		}
+//		catch(Exception e){
+//			e.printStackTrace();
+//		}
 	}
 	
 	
@@ -183,9 +199,9 @@ public class ControlRoom extends EventLoop{
 	 }
 	 
 	 @Override
-	 protected void postSimulationLoop() {
+	 public void postSimulationLoop() {
 		 super.preSimulationLoop();
-		 System.out.println(Scheduler.getInstance().now);
+		 System.out.println(SimulableSystem.currentTimeMillis());
 		 displayEnd();
 	 }
 	 
@@ -239,7 +255,6 @@ public class ControlRoom extends EventLoop{
 		 }
 		 new ViewApp(visual);
 		 System.err.println("---> "+counts);
-		 System.err.println("---> "+EventLoop.Count);
 		 System.err.println("---> "+slotcount);
 		 tracker.protocol.acceptor.unbindAll();
 		 for(int i=0;i<client.length;i++){
@@ -269,27 +284,27 @@ public class ControlRoom extends EventLoop{
 	 }
 	 boolean postTimer=true;
 	@Override
-	protected boolean postEventExecution() {
+	public boolean postEventExecution() {
 		
-		int time =(int)Scheduler.getInstance().now;
+		int time =(int)SimulableSystem.currentTimeMillis();
 		if(time%1000==0)
 		if(postTimer){
 			postTimer=false;
-			gatherInfo(0);
+			gatherInfo();
 		}
 		return false;
 	}
 	int slotcount=0;
-	public void gatherInfo(int dull){
+	public void gatherInfo(){
 			slotcount++;
 			for(int i=0;i<client.length;i++){
 				if(client[i]==null)
 					continue;
-				int now=(int)Scheduler.getInstance().now;
+				int now=(int)SimulableSystem.currentTimeMillis();
 				int missed=(client[i].joinTime-client[i].startTime);
 				if(i==8){
 					
-					System.err.println("now="+Scheduler.getInstance().now+" , join= "+client[i].joinTime+" , vsize+starttime= "+((client[i].videoSize*1000)+(client[i].startTime)));
+					//System.err.println("now="+SimulableSystem.currentTimeMillis()+" , join= "+client[i].joinTime+" , vsize+starttime= "+((client[i].videoSize*1000)+(client[i].startTime)));
 				}
 				if(now>((client[i].videoSize*1000)+(client[i].startTime))){
 				
@@ -312,12 +327,21 @@ public class ControlRoom extends EventLoop{
 			else{
 				collectCI();
 			}
-			try{
-				Timer timer = new Timer(snapShotRate,this,"gatherInfo",0);
-			}
-			catch(Exception e){
-				e.printStackTrace();
-			}
+			
+			/*
+			 * this section is modified to import new sim
+			*/			
+//			try{
+//				Timer timer = new Timer(snapShotRate,this,"gatherInfo",0);
+//			}
+//			catch(Exception e){
+//				e.printStackTrace();
+//			}
+			executor.schedule(new Runnable(){
+											public void run(){
+												gatherInfo();
+											}},
+											snapShotRate, TimeUnit.MICROSECONDS);
 	}
 
 	void collectCI(){

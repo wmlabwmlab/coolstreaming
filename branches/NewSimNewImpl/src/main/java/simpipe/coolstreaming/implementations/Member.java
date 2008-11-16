@@ -1,13 +1,13 @@
 package simpipe.coolstreaming.implementations;
 
-import se.peertv.peertvsim.core.Timer;
+import java.util.concurrent.ScheduledFuture;
 
 public class Member {
-		int port;
-		Timer timer;
+	int port;
+	ScheduledFuture<?> scheduledTask;
 
-		public Member(int port, Timer timer){
-			this.port = port;
-			this.timer = timer;
-		}
+	public Member(int port, ScheduledFuture<?> scheduledTask){
+		this.port = port;
+		this.scheduledTask = scheduledTask;
+	}
 }

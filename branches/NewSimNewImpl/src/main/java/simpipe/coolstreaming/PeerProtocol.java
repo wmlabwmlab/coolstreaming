@@ -9,10 +9,11 @@ import org.apache.mina.common.IoServiceConfig;
 import org.apache.mina.common.IoSession;
 import org.apache.mina.common.support.BaseIoConnector;
 
+import se.peertv.peertvsim.SimulableSystem;
 import se.peertv.peertvsim.core.Scheduler;
-import simpipe.SimPipeAcceptor;
-import simpipe.SimPipeAddress;
-import simpipe.SimPipeConnector;
+import simpipe.tcp.SimPipeAcceptor;
+import simpipe.base.support.SimPipeAddress;
+import simpipe.tcp.SimPipeConnector;
 
 public class PeerProtocol extends IoHandlerAdapter{
 
@@ -51,7 +52,7 @@ public class PeerProtocol extends IoHandlerAdapter{
 	public void sessionOpened(IoSession session) {
 		
 		//is someone connecting to my server or is pCache full
-		if((Integer.parseInt(session.getLocalAddress().toString()) > Constants.SERVER_PORT)||(node.partners.getLength()==node.pSize))
+		if((((SimPipeAddress)session.getLocalAddress()).getPort() > Constants.SERVER_PORT)||(node.partners.getLength()==node.pSize))
 			return;
 
 		// is the node still searching for a deputy?
@@ -93,7 +94,7 @@ public class PeerProtocol extends IoHandlerAdapter{
 	        case Constants.PARTNERSHIP_ACCEPTANCE :
 	        	ControlRoom.logger.debug("me "+node.port+" got "+msg+" , remainder"+node.deputyHops);
 	        	//System.out.println("me "+node.port+" got "+msg+" , remainder"+node.deputyHops);
-	        	node.joinTime=(int)Scheduler.getInstance().now;
+	        	node.joinTime=(int)SimulableSystem.currentTimeMillis();
 	        	node.beginSceduling();
 	        	partnersMessage(msgPart2, session);	
 	        	break;
@@ -183,7 +184,7 @@ public class PeerProtocol extends IoHandlerAdapter{
     }    
     
 	public void deputyMessage(String msgPart2,IoSession session){
-		if(Integer.parseInt(session.getRemoteAddress().toString())!=Constants.SERVER_PORT)
+		if(((SimPipeAddress)session.getRemoteAddress()).getPort() != Constants.SERVER_PORT)
 		session.close();
 		String myPort=String.valueOf(node.port);
 		if(!msgPart2.equals(myPort)){
@@ -192,7 +193,7 @@ public class PeerProtocol extends IoHandlerAdapter{
 		}
     	else {
 			node.beginSceduling();
-			node.joinTime=(int)Scheduler.getInstance().now;
+			node.joinTime=(int)SimulableSystem.currentTimeMillis();
 			node.searching=false;
 		}
 	}
@@ -322,8 +323,8 @@ public class PeerProtocol extends IoHandlerAdapter{
 		
 		if(node.scheduler.getWholeBits(index)!=1){
 			if(node.port==18)
-				System.err.println("segment: "+index+" ( now= "+Scheduler.getInstance().now/1000+" - deadline= "+node.scheduler.getDeadLine(index)+" )");
-		if(node.scheduler.getDeadLine(index)>=(Scheduler.getInstance().now/1000)){
+				System.err.println("segment: "+index+" ( now= "+SimulableSystem.currentTimeMillis()/1000+" - deadline= "+node.scheduler.getDeadLine(index)+" )");
+		if(node.scheduler.getDeadLine(index)>=(SimulableSystem.currentTimeMillis()/1000)){
 			node.continuityIndex++;
 			node.scheduler.setWholeBits(index,1);
 		}

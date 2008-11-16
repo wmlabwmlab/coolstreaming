@@ -8,7 +8,7 @@ import org.apache.mina.common.IoHandlerAdapter;
 import org.apache.mina.common.IoServiceConfig;
 import org.apache.mina.common.IoSession;
 
-import simpipe.SimPipeAcceptor;
+import simpipe.tcp.SimPipeAcceptor;
 import simpipe.coolstreaming.implementations.Partner;
 
 public class ServerProtocol extends IoHandlerAdapter {

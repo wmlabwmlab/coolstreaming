@@ -9,7 +9,7 @@ public interface Scheduler {
 	void fillDeadLine();
 	boolean isValid(int index,int timeNow);
 	BitField getWindow(int now);
-	void exchangeBM(int dull);
+	void exchangeBM();
 	BitField beginscheduling();
 	int pickPeer(int[] bandwidth);
 	String toString();

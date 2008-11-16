@@ -13,12 +13,12 @@ public class Gossip {
 	
 	private PeerNode node;
     //Gossip parameters
-    private int gossipTime=6000;
+    public int gossipTime=6000;
     private final int hops=3;
     
 	public Gossip(PeerNode node){
 		this.node=node;
-		initiate(0);
+		initiate();
 	}
 	
 	/*-this function is used to bridge gossiping message from one node to another
@@ -34,15 +34,18 @@ public class Gossip {
 	/*-this function is used to initiate gossiping (I am the source of gossiping)
 	 * -it is called periodically using the timer fired in the peerNode that alarms that the time has come for gossiping
 	 */
-	public void initiate(int dull){
+	public void initiate(){
     	for(int i=0;i<node.pSize;i++)
     		if(node.partners.getPartner(i)!=null)
     		sendMessage(node.partners.getPartner(i).getPort(),node.port,hops);
-		try {
-			new Timer(gossipTime,this,"initiate",0);
-		} catch (Exception e) {
-		e.printStackTrace();
-		}
+    	/*
+    	 * this section is modified to import new sim
+    	*/
+//    	try {
+//			new Timer(gossipTime,this,"initiate",0);
+//		} catch (Exception e) {
+//		e.printStackTrace();
+//		}
 	}
 	
 	/*each of the 2 functions in the class (initiate)&(bridge) must use the function sendmessag() to repopulate the gossip message for other nodes in the network

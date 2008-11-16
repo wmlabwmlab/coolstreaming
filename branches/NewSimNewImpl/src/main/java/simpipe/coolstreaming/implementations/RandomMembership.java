@@ -1,6 +1,9 @@
 package simpipe.coolstreaming.implementations;
 
+import java.util.concurrent.TimeUnit;
+
 import se.peertv.peertvsim.core.Timer;
+import se.peertv.peertvsim.executor.SchedulingExecutor;
 import simpipe.coolstreaming.interfaces.Membership;
 
 public class RandomMembership implements Membership {
@@ -8,15 +11,17 @@ public class RandomMembership implements Membership {
 	int mSize=0;
 	int port;
 	int deleteTime=30000;
+	private SchedulingExecutor executor;
 	
 	public RandomMembership() {
-		
+        executor = new SchedulingExecutor(1234567);
 	}
 	public RandomMembership(int mSize,int port,int deleteTime){
     	this.port=port;
     	mCache =new Member[mSize];
         this.mSize=mSize;
         this.deleteTime = deleteTime;
+        executor = new SchedulingExecutor(1234567);
     }
 	
 	@Override
@@ -46,18 +51,38 @@ public class RandomMembership implements Membership {
 	}
 	
 	@Override	
-	public synchronized void addMember(int port){
+	public synchronized void addMember(final int port){
  		try{	    	
 	    	int index=getIndex(port);
 	    	if(index!=-1){
-	    			mCache[index].timer.reset();
-	    			mCache[index].timer=new Timer(deleteTime,(Object)this,"deleteMember",port);
+    			/*
+    			 * this section has been commented to import the new sim
+    			 */
+//	    		mCache[index].timer.reset();
+//	    		mCache[index].timer=new Timer(deleteTime,(Object)this,"deleteMember",port);
+	    		mCache[index].scheduledTask.cancel(true);
+	    		if(mCache[index].scheduledTask.isCancelled())
+	    			mCache[index].scheduledTask = executor.schedule(new Runnable(){
+	    											public void run(){deleteMember(port);}},
+	    												deleteTime, TimeUnit.MILLISECONDS);	    		
 	    	}
-	    	else{
-    			Member m = new Member(port,new Timer(deleteTime,(Object)this,"deleteMember",port));
-    			if(getLength()==mSize){ //the member buffer is full
+    		/*
+    		 * this section has been commented to import the new sim
+    		 */	    	
+//	    	else{
+//	    		/*
+//	    		 * this section has been commented to import the new sim
+//	    		 */
+//    			Member m = new Member(port,new Timer(deleteTime,(Object)this,"deleteMember",port));
+	    	
+	    	if(index == -1 || !mCache[index].scheduledTask.isCancelled()){
+    			Member m = new Member(port,
+    									executor.schedule(new Runnable(){
+    											public void run(){deleteMember(port);}},
+    												deleteTime, TimeUnit.MILLISECONDS));
+	    	if(getLength()==mSize){ //the member buffer is full
 	    			int i = ((int)(Math.random()*mSize))%mSize;
-    				mCache[i].timer.reset();
+//    				mCache[i].timer.reset();  //has been commented to import the new sim
 		    		mCache[i]=m;
 	    		}
 	    		else{
@@ -80,7 +105,8 @@ public class RandomMembership implements Membership {
 	    		if(mCache[i]!=null)
 	    		if(mCache[i].port==port){
 	    			try{
-	    				mCache[i].timer.reset();
+//	    				mCache[i].timer.reset();  //has been commented to import the new sim
+	    				mCache[i].scheduledTask.cancel(true);
 	    			}
 	    			catch (Exception e) {
 	    				e.printStackTrace();
