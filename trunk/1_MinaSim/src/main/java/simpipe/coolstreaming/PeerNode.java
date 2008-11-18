@@ -73,9 +73,9 @@ public class PeerNode extends Node {
  			 members=p.getMembers();
  	 		 partners=p.getPartners();
  	 		 scheduler=p.getScheduler();
- 	 		 members.setParams(mSize,port,deleteTime);
- 	 		 partners.setParams(pSize,port,windowSize,defaultBandwidth,this);
  	 		 scheduler.setParams(this,startTime);
+ 	 		 partners.setParams(pSize,port,windowSize,defaultBandwidth,this);
+ 	 		 members.setParams(mSize,port,deleteTime);
  			
  		 }
  		 catch(Exception e){
