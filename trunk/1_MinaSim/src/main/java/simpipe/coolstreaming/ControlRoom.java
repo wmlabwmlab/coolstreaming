@@ -136,14 +136,14 @@ public class ControlRoom extends EventLoop{
 	
 	public void createClient(int time){
 		tracker.members.clearPartners();
-		if(maxPeers<peerNumber){
-			client[maxPeers]= new PeerNode(false,serverAddress,portStart+maxPeers);
+		if(maxPeers<sourceNumber){
+			client[maxPeers]= new PeerNode(true,serverAddress,portStart+maxPeers);
 			maxPeers++;
 			
 		}
 		else{
 			if(maxPeers<(peerNumber+sourceNumber)){
-				client[maxPeers]= new PeerNode(true,serverAddress,portStart+maxPeers);
+				client[maxPeers]= new PeerNode(false,serverAddress,portStart+maxPeers);
 				maxPeers++;
 				
 			}
@@ -287,10 +287,10 @@ public class ControlRoom extends EventLoop{
 					continue;
 				int now=(int)Scheduler.getInstance().now;
 				int missed=(client[i].joinTime-client[i].startTime);
-				if(i==8){
+				/*if(i==8){
 					
 					System.err.println("now="+Scheduler.getInstance().now+" , join= "+client[i].joinTime+" , vsize+starttime= "+((client[i].videoSize*1000)+(client[i].startTime)));
-				}
+				}*/
 				if(now>((client[i].videoSize*1000)+(client[i].startTime))){
 				
 						System.err.println("BREAAAAKKKKKK");
