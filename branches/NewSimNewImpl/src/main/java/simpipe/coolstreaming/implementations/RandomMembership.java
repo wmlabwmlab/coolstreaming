@@ -11,17 +11,15 @@ public class RandomMembership implements Membership {
 	int mSize=0;
 	int port;
 	int deleteTime=30000;
-	private SchedulingExecutor executor;
 	
 	public RandomMembership() {
-        executor = new SchedulingExecutor(1234567);
 	}
+
 	public RandomMembership(int mSize,int port,int deleteTime){
     	this.port=port;
     	mCache =new Member[mSize];
         this.mSize=mSize;
         this.deleteTime = deleteTime;
-        executor = new SchedulingExecutor(1234567);
     }
 	
 	@Override
@@ -62,7 +60,7 @@ public class RandomMembership implements Membership {
 //	    		mCache[index].timer=new Timer(deleteTime,(Object)this,"deleteMember",port);
 	    		mCache[index].scheduledTask.cancel(true);
 	    		if(mCache[index].scheduledTask.isCancelled())
-	    			mCache[index].scheduledTask = executor.schedule(new Runnable(){
+	    			mCache[index].scheduledTask = new SchedulingExecutor(System.currentTimeMillis()).schedule(new Runnable(){
 	    											public void run(){deleteMember(port);}},
 	    												deleteTime, TimeUnit.MILLISECONDS);	    		
 	    	}
@@ -77,7 +75,7 @@ public class RandomMembership implements Membership {
 	    	
 	    	if(index == -1 || !mCache[index].scheduledTask.isCancelled()){
     			Member m = new Member(port,
-    									executor.schedule(new Runnable(){
+    					new SchedulingExecutor(System.currentTimeMillis()).schedule(new Runnable(){
     											public void run(){deleteMember(port);}},
     												deleteTime, TimeUnit.MILLISECONDS));
 	    	if(getLength()==mSize){ //the member buffer is full
