@@ -96,10 +96,10 @@ public class PeerNode extends Node {
  			 members = new RandomMembership();
  	 		 partners = new RandomPartnership();
  	 		 scheduler = new CoolStreamingScheduler();
+ 	 		 scheduler.setParams(this,startTime);
  			 members.setParams(mSize,port,deleteTime);
  	 		 partners.setParams(pSize,port,windowSize,defaultBandwidth,this);
- 	 		 scheduler.setParams(this,startTime);
- 			
+ 	 		 
  		 }
  		 catch(Exception e){
  			 System.out.println("Error Parsing File");
