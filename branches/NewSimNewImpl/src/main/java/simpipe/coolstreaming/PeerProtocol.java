@@ -2,15 +2,15 @@ package simpipe.coolstreaming;
 
 import java.net.SocketAddress;
 
-import org.apache.log4j.Logger;
 import org.apache.mina.common.IoAcceptor;
 import org.apache.mina.common.IoHandlerAdapter;
 import org.apache.mina.common.IoServiceConfig;
 import org.apache.mina.common.IoSession;
+//import org.apache.mina.common.IoConnector;
 import org.apache.mina.common.support.BaseIoConnector;
 
 import se.peertv.peertvsim.SimulableSystem;
-import se.peertv.peertvsim.core.Scheduler;
+
 import simpipe.tcp.SimPipeAcceptor;
 import simpipe.base.support.SimPipeAddress;
 import simpipe.tcp.SimPipeConnector;
@@ -18,14 +18,16 @@ import simpipe.tcp.SimPipeConnector;
 public class PeerProtocol extends IoHandlerAdapter{
 
 	IoAcceptor acceptor;
+	//BaseIoConnector connector;
+	
 	private PeerNode node;
     private boolean bootStraping=true;
     public int committed=0;
 	
 	public PeerProtocol(SocketAddress serverAddress,PeerNode node){
 		this.node=node;
-		BaseIoConnector connector;
-		connector = new SimPipeConnector();
+		
+		BaseIoConnector connector = new SimPipeConnector();
 		connector.connect(serverAddress, this);
 	}
 
@@ -36,6 +38,7 @@ public class PeerProtocol extends IoHandlerAdapter{
 	public void sessionCreated(IoSession session) throws Exception {
 		
     	if(bootStraping){
+//			System.out.println("node: "+node.getPort()+" is sessionCreated......with bootstraping = "+bootStraping);
 			bootStraping=false;
     		node.initalizeNode();
 			//node.port=Integer.parseInt(session.getLocalAddress().toString());
@@ -173,8 +176,8 @@ public class PeerProtocol extends IoHandlerAdapter{
     
     // this function is used to make my peernode connect to another peer
     void connectTo(int port){
-    	BaseIoConnector connector= new SimPipeConnector();
     	SocketAddress serverPort= new SimPipeAddress(Constants.SERVER_PORT+port);
+    	BaseIoConnector connector = new SimPipeConnector(); 
     	connector.connect(serverPort,this);
     }
 
