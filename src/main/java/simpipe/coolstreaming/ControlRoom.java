@@ -359,7 +359,6 @@ public class ControlRoom extends EventLoop{
 					CIs[i]=-1;
 				}
 			}
-		
 			else {
 				CIs[i]=-1;
 			}
