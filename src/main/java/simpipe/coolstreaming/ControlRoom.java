@@ -10,10 +10,17 @@ import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import javax.swing.JOptionPane;
+import javax.swing.plaf.basic.BasicScrollPaneUI.VSBChangeListener;
+
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import se.peertv.peertvsim.SimulableSystem;
+import org.apache.log4j.PatternLayout;
+import org.apache.log4j.SimpleLayout;
+
 import se.peertv.peertvsim.core.EventLoop;
 import se.peertv.peertvsim.executor.SchedulingExecutor;
 import simpipe.base.support.SimPipeAddress;
@@ -31,15 +38,16 @@ import simpipe.coolstreaming.visualization.ViewApp;
 import simpipe.coolstreaming.visualization.Visualization;
 
 import org.apache.commons.math.stat.*;
+import org.hamcrest.core.IsAnything;
 
 
 public class ControlRoom extends EventLoop{
 
 	
 	//Static automated variables
-	public static boolean isAutomated=true;
+	public static boolean isAutomated=false;
 	public static int peers=25;
-	public static int seeds=5;
+	public static int seeds=30;
 	public static int windowSize=30;
 	public static int slack=3;
 	public static int segment=1;
@@ -49,7 +57,7 @@ public class ControlRoom extends EventLoop{
 	
 	
 	static Logger logger;
-	int peerNumber=10;
+	int peerNumber=20;
 	int sourceNumber=5;
 	int creationRate = 500; // 1 client per 0.5 minute 
 	int portStart=15;
@@ -68,6 +76,7 @@ public class ControlRoom extends EventLoop{
 	CentralNode tracker;
 	Visualization visual[];
 	
+	
 	int maxPeers=0;
 	int[]empty={};
 	
@@ -78,10 +87,10 @@ public class ControlRoom extends EventLoop{
 		//init logger
 		Logger.getRootLogger().removeAllAppenders();
 		logger =Logger.getLogger("debugging_logger");
-		logger.setLevel((Level)Level.ERROR);
+		logger.setLevel((Level)Level.DEBUG);
 /*
  * this section is modified to import new sim
-*/
+*/    	
 		
 //		try{
 //			Timer timer = new Timer(creationRate,this,"createClient",(int)SimulableSystem.currentTimeMillis()+creationRate);
@@ -120,7 +129,7 @@ public class ControlRoom extends EventLoop{
 		m.createServer();
 		
 		m.client=new PeerNode[m.peerNumber+m.sourceNumber];
-		new SchedulingExecutor(System.currentTimeMillis()).scheduleAtFixedRate(new Runnable(){	public void run(){
+				new SchedulingExecutor(System.currentTimeMillis()).scheduleAtFixedRate(new Runnable(){	public void run(){
 															m.createClient();}},
 															m.creationRate,m.creationRate,TimeUnit.MILLISECONDS,m.peerNumber+m.sourceNumber);
 		
@@ -136,14 +145,12 @@ public class ControlRoom extends EventLoop{
 		tracker.members.clearPartners();
 		if(maxPeers<sourceNumber){
 			client[maxPeers]= new PeerNode(true,serverAddress,portStart+maxPeers);
-//			System.out.println(""+maxPeers+"peer is created it is source with port "+client[maxPeers].getPort());
 			maxPeers++;
 			
 		}
 		else{
 			if(maxPeers<(peerNumber+sourceNumber)){
 				client[maxPeers]= new PeerNode(false,serverAddress,portStart+maxPeers);
-//				System.out.println(""+maxPeers+"peer is created it is peer with port "+client[maxPeers].getPort());
 				maxPeers++;
 				
 			}
@@ -265,7 +272,7 @@ public class ControlRoom extends EventLoop{
 			        
 			    } 
 			 catch (Exception e) {
-				 System.err.println(AVG);
+			 				 System.err.println(AVG);
 			   }
 
 			 
@@ -289,15 +296,15 @@ public class ControlRoom extends EventLoop{
 			for(int i=0;i<client.length;i++){
 				if(client[i]==null)
 					continue;
-				int now=(int)SimulableSystem.currentTimeMillis();
+		int now=(int)SimulableSystem.currentTimeMillis();
 				int missed=(client[i].joinTime-client[i].startTime);
-				if(i==8){
+				/*if(i==8){
 					
-					//System.err.println("now="+SimulableSystem.currentTimeMillis()+" , join= "+client[i].joinTime+" , vsize+starttime= "+((client[i].videoSize*1000)+(client[i].startTime)));
-				}
+					System.err.println("now="+Scheduler.getInstance().now+" , join= "+client[i].joinTime+" , vsize+starttime= "+((client[i].videoSize*1000)+(client[i].startTime)));
+				}*/
 				if(now>((client[i].videoSize*1000)+(client[i].startTime))){
 				
-//						System.err.println("BREAAAAKKKKKK");
+						System.err.println("BREAAAAKKKKKK");
 					break;
 					//client[i].allIndex=client[i].videoSize-(missed/1000);
 					//continue;

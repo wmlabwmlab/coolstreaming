@@ -34,9 +34,9 @@ public class PeerNode extends Node {
 
 
     public void reboot(){ 
-    	System.out.println("reboot is called....");
+    	System.out.println("reboot is called....");    	
     	if((this.searching||partners.getLength()==0)&&i++==4){
-    		
+    	
     		this.deputyHops=4;
     		protocol.connectTo(0);
     		i=0;
@@ -80,7 +80,7 @@ public class PeerNode extends Node {
 												public void run(){scheduler.exchangeBM();}
 												},
 					  scheduler.getExchangeTime(), scheduler.getExchangeTime(), TimeUnit.MILLISECONDS);
-		}    	
+		}
     }
     
  	public void initalizeNode() throws Exception{
