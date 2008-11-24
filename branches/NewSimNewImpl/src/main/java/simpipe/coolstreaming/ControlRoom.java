@@ -346,14 +346,20 @@ public class ControlRoom extends EventLoop{
 		double CIs[] = new double[client.length]; 
 		for(int i=0;i<client.length;i++)
 			if(client[i]!=null){
-				double CI=(((double)client[i].continuityIndex)/((double)client[i].allIndex));
-				if(Double.isNaN(CI))
-					CI=1;
-				if(CI>threshold)
-					CI=threshold;
+				if(!client[i].isSource){
+					double CI=(((double)client[i].continuityIndex)/((double)client[i].allIndex));
+					if(Double.isNaN(CI))
+						CI=1;
+					if(CI>threshold)
+						CI=threshold;
 				
-				CIs[i]=CI;
+					CIs[i]=CI;
+				}
+				else {
+					CIs[i]=-1;
+				}
 			}
+		
 			else {
 				CIs[i]=-1;
 			}
