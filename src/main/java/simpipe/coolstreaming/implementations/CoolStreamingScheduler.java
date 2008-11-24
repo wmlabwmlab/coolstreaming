@@ -47,6 +47,7 @@ public class CoolStreamingScheduler implements simpipe.coolstreaming.interfaces.
 	
 	@Override
 	public BitField beginscheduling() {
+		System.out.println("node: "+node.getPort()+" is beginscheduling......");
 		BitField field = new BitField(node.getWindowSize());
 		ArrayList<Integer> dupSet [] =new ArrayList[node.getPSize()+1];
 		ArrayList<Integer> tempSupplierSet [] =new ArrayList[node.getWindowSize()];
@@ -99,6 +100,7 @@ public class CoolStreamingScheduler implements simpipe.coolstreaming.interfaces.
 
 	@Override
 	public void exchangeBM() {
+//		System.out.println("node: "+node.getPort()+" is exchangeBM......");
 		int milliesNow=(int)SimulableSystem.currentTimeMillis();	
     //	int secondNow=milliesNow/1000;
     	timeSlot = milliesNow;
@@ -144,6 +146,7 @@ public class CoolStreamingScheduler implements simpipe.coolstreaming.interfaces.
 	@Override
 	public void identifyRequiredSegments() {
 		if(requesting){
+			System.out.println("node: "+node.getPort()+" is identifyRequiredSegments......");
 			requesting=false;
 			int diff=(timeSlot - startTime)/1000;
 			
