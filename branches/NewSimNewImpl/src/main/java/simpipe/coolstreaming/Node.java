@@ -23,7 +23,7 @@ public class Node {
     final int mSize=20;
     int deputyHops=5;
     int deleteTime=60000; // time to delete the members from the mCache
-    int bootTime=1000;
+    int bootTime=3000;
     int continuityIndex;
     int allIndex; // it is all the segments that I've received (doesnt matter if its deadline came or not when it is received)
     int bandwidth;
@@ -31,7 +31,7 @@ public class Node {
   
   //Video parameters
     int windowSize=30;	//30 sec
-    int videoSize=870;  //used to be 120sec 
+    int videoSize=870;  //14.5 min., used to be 120sec 
     int segmentSize=256; //256 Kb = 32 KB for one sec
     BitField myBuffer;
 

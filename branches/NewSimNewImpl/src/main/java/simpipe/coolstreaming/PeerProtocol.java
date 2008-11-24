@@ -2,11 +2,11 @@ package simpipe.coolstreaming;
 
 import java.net.SocketAddress;
 
+import org.apache.log4j.Logger;
 import org.apache.mina.common.IoAcceptor;
 import org.apache.mina.common.IoHandlerAdapter;
 import org.apache.mina.common.IoServiceConfig;
 import org.apache.mina.common.IoSession;
-//import org.apache.mina.common.IoConnector;
 import org.apache.mina.common.support.BaseIoConnector;
 
 import se.peertv.peertvsim.SimulableSystem;
