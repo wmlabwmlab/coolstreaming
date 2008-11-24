@@ -14,7 +14,7 @@ public class Conf {
 	public static int MAX_LINK_DELAY = 400;
 
 	// Simulator Parameters
-	public static long MAX_SIMULATION_TIME = 1000 * 60 * 2; // 10 minutes
+	public static long MAX_SIMULATION_TIME = 1000 * 60 * 15; // 10 minutes
 	// public static long MAX_SIMULATION_TIME = 1000 * 10 * 4; // 10 minutes
 
 	public static int RANDOM_SEED = 4;
