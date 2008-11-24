@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import se.peertv.peertvsim.core.Scheduler;
 import se.peertv.peertvsim.core.Timer;
 import se.peertv.peertvsim.executor.SchedulingExecutor;
+import simpipe.coolstreaming.implementations.CSwithTransferTimeScheduler;
 import simpipe.coolstreaming.implementations.CoolStreamingScheduler;
 import simpipe.coolstreaming.implementations.RandomMembership;
 import simpipe.coolstreaming.implementations.RandomPartnership;
@@ -95,11 +96,14 @@ public class PeerNode extends Node {
 // 	 		 scheduler=p.getScheduler();
  			 members = new RandomMembership();
  	 		 partners = new RandomPartnership();
- 	 		 scheduler = new CoolStreamingScheduler();
- 	 		 scheduler.setParams(this,startTime);
- 			 members.setParams(mSize,port,deleteTime);
- 	 		 partners.setParams(pSize,port,windowSize,defaultBandwidth,this);
+ 	 		 scheduler = new CSwithTransferTimeScheduler();
  	 		 
+ 	 		 scheduler.setParams(this,startTime);
+ 	 		 partners.setParams(pSize,port,windowSize,defaultBandwidth,this);
+ 	 		 members.setParams(mSize,port,deleteTime);
+ 	 		 
+ 	 		 
+ 			
  		 }
  		 catch(Exception e){
  			 System.out.println("Error Parsing File");
