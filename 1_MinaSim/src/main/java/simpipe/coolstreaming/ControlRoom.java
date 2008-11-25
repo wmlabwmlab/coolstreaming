@@ -9,20 +9,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
 
-import javax.swing.JOptionPane;
-import javax.swing.plaf.basic.BasicScrollPaneUI.VSBChangeListener;
-
+import org.apache.commons.math.stat.StatUtils;
 import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.SimpleLayout;
 
 import se.peertv.peertvsim.core.EventLoop;
 import se.peertv.peertvsim.core.Scheduler;
 import se.peertv.peertvsim.core.Timer;
-import se.peertv.peertvsim.thread.Thread;
 import simpipe.SimPipeAddress;
 import simpipe.coolstreaming.implementations.Partner;
 import simpipe.coolstreaming.visualization.ContinuityIndex;
@@ -36,9 +30,6 @@ import simpipe.coolstreaming.visualization.PScoreOverPeers;
 import simpipe.coolstreaming.visualization.TimeSlot;
 import simpipe.coolstreaming.visualization.ViewApp;
 import simpipe.coolstreaming.visualization.Visualization;
-
-import org.apache.commons.math.stat.*;
-import org.hamcrest.core.IsAnything;
 
 
 public class ControlRoom extends EventLoop{
@@ -326,13 +317,18 @@ public class ControlRoom extends EventLoop{
 		double CIs[] = new double[client.length]; 
 		for(int i=0;i<client.length;i++)
 			if(client[i]!=null){
-				double CI=(((double)client[i].continuityIndex)/((double)client[i].allIndex));
-				if(Double.isNaN(CI))
-					CI=1;
-				if(CI>threshold)
-					CI=threshold;
+				if(!client[i].isSource){
+					double CI=(((double)client[i].continuityIndex)/((double)client[i].allIndex));
+					if(Double.isNaN(CI))
+						CI=1;
+					if(CI>threshold)
+						CI=threshold;
 				
-				CIs[i]=CI;
+					CIs[i]=CI;
+				}
+				else {
+					CIs[i]=-1;
+				}
 			}
 			else {
 				CIs[i]=-1;
