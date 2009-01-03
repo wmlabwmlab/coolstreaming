@@ -35,6 +35,7 @@ public class PeerNode extends Node {
 
 
     public void reboot(){ 
+    	if (port == 20 || port == 100)
     	System.out.println("reboot is called....");    	
     	if((this.searching||partners.getLength()==0)&&i++==4){
     	
@@ -115,9 +116,9 @@ public class PeerNode extends Node {
 		/*
 		 * this section has been added to import the new sim
 		 */
-//		executor.scheduleAtFixedRate(new Runnable(){
-//										public void run(){gossip.initiate();}},
-//										gossip.gossipTime, gossip.gossipTime, TimeUnit.MILLISECONDS);
+		new SchedulingExecutor(System.currentTimeMillis()).scheduleAtFixedRate(new Runnable(){
+										public void run(){gossip.initiate();}},
+										gossip.gossipTime, gossip.gossipTime, TimeUnit.MILLISECONDS);
 		bandwidth=(int)((Math.random()*512)+100);
 		
 		/*

@@ -188,11 +188,11 @@ public class PeerProtocol extends IoHandlerAdapter{
     
 	public void deputyMessage(String msgPart2,IoSession session){
 		if(((SimPipeAddress)session.getRemoteAddress()).getPort() != Constants.SERVER_PORT)
-		session.close();
+			session.close();
 		String myPort=String.valueOf(node.port);
 		if(!msgPart2.equals(myPort)){
-    	connectTo(Integer.parseInt(msgPart2));
-    	node.members.addMember(Integer.parseInt(msgPart2));
+			connectTo(Integer.parseInt(msgPart2));
+			node.members.addMember(Integer.parseInt(msgPart2));
 		}
     	else {
 			node.beginSceduling();

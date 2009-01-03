@@ -45,7 +45,7 @@ public class ControlRoom extends EventLoop{
 
 	
 	//Static automated variables
-	public static boolean isAutomated=false;
+	public static boolean isAutomated=true;
 	public static int peers=25;
 	public static int seeds=30;
 	public static int windowSize=30;
@@ -128,9 +128,9 @@ public class ControlRoom extends EventLoop{
 		}
 		m.createServer();
 		
-		m.client=new PeerNode[m.peerNumber+m.sourceNumber];
-				new SchedulingExecutor(System.currentTimeMillis()).scheduleAtFixedRate(new Runnable(){	public void run(){
-															m.createClient();}},
+		m.client = new PeerNode[m.peerNumber+m.sourceNumber];
+		new SchedulingExecutor(System.currentTimeMillis()).scheduleAtFixedRate(
+															new Runnable(){	public void run(){m.createClient();}},
 															m.creationRate,m.creationRate,TimeUnit.MILLISECONDS,m.peerNumber+m.sourceNumber);
 		
 		m.run();
