@@ -45,7 +45,7 @@ public class ControlRoom extends EventLoop{
 
 	
 	//Static automated variables
-	public static boolean isAutomated=true;
+	public static boolean isAutomated=false;
 	public static int peers=25;
 	public static int seeds=30;
 	public static int windowSize=30;
