@@ -143,6 +143,8 @@ public class ControlRoom extends EventLoop{
 	
 	public void createClient(){
 		tracker.members.clearPartners();
+		double rand=Math.random();
+		
 		if(maxPeers<sourceNumber){
 			client[maxPeers]= new PeerNode(true,serverAddress,portStart+maxPeers);
 			maxPeers++;
@@ -216,6 +218,7 @@ public class ControlRoom extends EventLoop{
 			 if(CI>threshold)
 				 CI=threshold;
 			 logger.info("continuity index = "+CI);
+			 logger.info("Joined at time = "+client[i].joinTime);
 			 String partners = "My Partners are  : ";
 			 for(int j=0;j<client[i].pSize;j++){
 	    		if(client[i].partners.getPartner(j)!=null)
@@ -296,7 +299,7 @@ public class ControlRoom extends EventLoop{
 			for(int i=0;i<client.length;i++){
 				if(client[i]==null)
 					continue;
-		int now=(int)SimulableSystem.currentTimeMillis();
+				int now=(int)SimulableSystem.currentTimeMillis();
 				int missed=(client[i].joinTime-client[i].startTime);
 				/*if(i==8){
 					
@@ -304,7 +307,7 @@ public class ControlRoom extends EventLoop{
 				}*/
 				if(now>((client[i].videoSize*1000)+(client[i].startTime))){
 				
-						System.err.println("BREAAAAKKKKKK");
+					System.err.println("BREAAAAKKKKKK");
 					break;
 					//client[i].allIndex=client[i].videoSize-(missed/1000);
 					//continue;
@@ -441,16 +444,15 @@ public class ControlRoom extends EventLoop{
 	}
 	
 	void fillContinuityIndex(){
-		double threshold=1;
 		TimeSlot sSlot1 = new TimeSlot();
 		double CIs[] = new double[client.length]; 
 		for(int i=0;i<client.length;i++)
 			if(client[i]!=null){
+				//if(client[i].port==39)
+					//System.err.println("------> "+client[i].continuityIndex+" - "+client[i].allIndex);
 				double CI=(((double)client[i].continuityIndex)/((double)client[i].allIndex));
 				if(Double.isNaN(CI))
 					CI=1;
-				if(CI>threshold)
-					CI=threshold;
 				
 				CIs[i]=CI;
 			}

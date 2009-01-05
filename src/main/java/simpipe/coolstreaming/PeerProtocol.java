@@ -284,10 +284,6 @@ public class PeerProtocol extends IoHandlerAdapter{
 		int originalPort=Integer.parseInt(gParam[0]);
 		node.members.addMember(originalPort);
 		
-		if(node.partners.getLength()+committed < node.pSize&&node.partners.getIndex(originalPort)==-1){
-			connectTo(originalPort);
-			committed++;
-		}
 		
 		if(hops>0){
     		node.gossip.bridge(originalPort,hops);
@@ -325,8 +321,8 @@ public class PeerProtocol extends IoHandlerAdapter{
 		int index=Integer.parseInt(msgPart2);
 		
 		if(node.scheduler.getWholeBits(index)!=1){
-			if(node.port==18)
-				System.err.println("segment: "+index+" ( now= "+SimulableSystem.currentTimeMillis()/1000+" - deadline= "+node.scheduler.getDeadLine(index)+" )");
+		//	if(node.port==39)
+		//		System.err.println("segment: "+index+" ( now= "+SimulableSystem.currentTimeMillis()/1000+" - deadline= "+node.scheduler.getDeadLine(index)+" )");
 		if(node.scheduler.getDeadLine(index)>=(SimulableSystem.currentTimeMillis()/1000)){
 			node.continuityIndex++;
 			node.scheduler.setWholeBits(index,1);

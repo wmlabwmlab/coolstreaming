@@ -33,8 +33,22 @@ public class PeerNode extends Node {
     	protocol = new PeerProtocol(serverAdderess,this); 
     }
 
-
+    int gate=0;
+    int partnerInterval=2;
     public void reboot(){ 
+    	gate++;
+    	if(gate%partnerInterval==0){
+    		
+    		if(partners.getLength()+protocol.committed < pSize){
+    			int newNode=members.getStranger(partners);
+    			if(newNode!=-1){
+    				protocol.connectTo(newNode);
+    				protocol.committed++;
+    			}
+    		}
+    	}
+    	
+    	
     	if (port == 20 || port == 100)
     	System.out.println("reboot is called....");    	
     	if((this.searching||partners.getLength()==0)&&i++==4){
