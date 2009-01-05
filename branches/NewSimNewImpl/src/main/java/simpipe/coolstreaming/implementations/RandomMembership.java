@@ -1,10 +1,12 @@
 package simpipe.coolstreaming.implementations;
 
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import se.peertv.peertvsim.core.Timer;
 import se.peertv.peertvsim.executor.SchedulingExecutor;
 import simpipe.coolstreaming.interfaces.Membership;
+import simpipe.coolstreaming.interfaces.Partnership;
 
 public class RandomMembership implements Membership {
 	private Member[] mCache;
@@ -155,4 +157,26 @@ public class RandomMembership implements Membership {
 	public void fire(char header){
 		
 	}
+
+	@Override
+	public int getStranger(Partnership partnership) {
+		ArrayList<Integer> strangers = new ArrayList<Integer>();
+		for(int i=0;i<getLength();i++){
+			if(getMember(i)==null)
+				continue;
+			int port=getMember(i).port;
+			if(partnership.getIndex(port)==-1){
+				strangers.add(port);
+			}
+		}
+		int size=strangers.size();
+		if(size==0)
+			return -1;
+		int rand=(int)(Math.random()*size);
+	    if(rand==size)
+	    	rand=0;
+	    int port= strangers.get(rand);
+		return port;
+	}
+	
 }
