@@ -23,7 +23,6 @@ public class Node {
     final int mSize=20;
     int deputyHops=5;
     int deleteTime=70000; // time to delete the members from the mCache
-    int bootTime=3000;
     int continuityIndex;
     int allIndex; // it is all the segments that I've received (doesnt matter if its deadline came or not when it is received)
     int bandwidth;
@@ -111,12 +110,7 @@ public class Node {
 	public void setDeleteTime(int deleteTime) {
 		this.deleteTime = deleteTime;
 	}
-	public int getBootTime() {
-		return bootTime;
-	}
-	public void setBootTime(int bootTime) {
-		this.bootTime = bootTime;
-	}
+
 	public int getContinuityIndex() {
 		return continuityIndex;
 	}
