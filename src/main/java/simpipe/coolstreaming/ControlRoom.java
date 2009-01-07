@@ -195,13 +195,7 @@ public class ControlRoom extends EventLoop{
 		}
 	 }
 	 
-	 @Override
-	 public void postSimulationLoop() {
-		 super.preSimulationLoop();
-		 System.out.println(SimulableSystem.currentTimeMillis());
-		 displayEnd();
-	 }
-	 
+	
 	 public  void displayEnd(){
 		 System.out.println("END");
 		 if(!isAutomated){
@@ -278,6 +272,15 @@ public class ControlRoom extends EventLoop{
 			 
 		 }
 	 }
+	 
+	 @Override
+	 public void postSimulationLoop() {
+		 super.preSimulationLoop();
+		 System.out.println(SimulableSystem.currentTimeMillis());
+		 displayEnd();
+	 }
+	 
+	 
 	 boolean postTimer=true;
 	@Override
 	public boolean postEventExecution() {
