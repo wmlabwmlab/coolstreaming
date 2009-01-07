@@ -204,7 +204,6 @@ public class ControlRoom extends EventLoop{
 	 
 	 public  void displayEnd(){
 		 System.out.println("END");
-		 double threshold=1;
 		 if(!isAutomated){
 		 for(int i=0;i<client.length;i++){
 			 if(client[i]==null)
@@ -215,8 +214,6 @@ public class ControlRoom extends EventLoop{
 				 logger.info("[Peer "+client[i].port+"] : Source");
 			 	 
 			 double CI=((double)client[i].continuityIndex)/((double)client[i].allIndex);
-			 if(CI>threshold)
-				 CI=threshold;
 			 logger.info("continuity index = "+CI);
 			 logger.info("Joined at time = "+client[i].joinTime);
 			 String partners = "My Partners are  : ";
