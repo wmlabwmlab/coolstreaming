@@ -39,7 +39,7 @@ public class ContinuityIndex extends Visualization{
 	
 	@Override
 	public boolean isDependent() {
-		return false;
+		return true;
 	}
 	
 	@Override

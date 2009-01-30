@@ -9,8 +9,12 @@ public class Node {
 	int port;
 	boolean isSource=false;
 	int dummy=400;
-	int startTime=100;
+	int startTime=200;
 	int joinTime=200;
+	
+	boolean isLeaving=false;
+	int leavingTime=30000;
+	boolean isOutNow=false;
 	
 	Partnership partners;
     Membership members;
@@ -30,8 +34,8 @@ public class Node {
     final int defaultBandwidth=256;
   
   //Video parameters
-    int windowSize=30;	//30 sec
-    int videoSize=870;  //14.5 min., used to be 120sec 
+    int windowSize=60;	//30 sec
+    public static int videoSize=870;  //14.5 min., used to be 120sec 
     int segmentSize=256; //256 Kb = 32 KB for one sec
     BitField myBuffer;
 

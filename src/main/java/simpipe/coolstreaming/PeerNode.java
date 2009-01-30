@@ -1,6 +1,7 @@
 package simpipe.coolstreaming;
 
 import java.net.SocketAddress;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import se.peertv.peertvsim.core.Scheduler;
@@ -26,13 +27,28 @@ public class PeerNode extends Node {
     IoSession serverBond;
     int i=0;
     
-    PeerNode(boolean source,SocketAddress serverAdderess,int port){
+    PeerNode(boolean source,SocketAddress serverAdderess,int port,boolean leaving , int time){
+    	this.isLeaving = leaving;
+    	this.leavingTime = time;
     	isSource=source;
-
     	this.port=port;
-    	protocol = new PeerProtocol(serverAdderess,this); 
+    	protocol = new PeerProtocol(serverAdderess,this);
+    	if(isLeaving){
+    		ScheduledFuture<?> scheduledTask;
+    		scheduledTask = new SchedulingExecutor(System.currentTimeMillis()).schedule(new Runnable(){
+				public void run(){quit();}},
+					leavingTime,TimeUnit.MILLISECONDS);
+    	}
     }
 
+    public void quit(){
+    	for(int i=0;i<pSize;i++){
+    		if(partners.getPartner(i)!=null)
+    		partners.getPartner(i).getSession().close();
+    	}
+    	isOutNow=true;
+    }
+    
     int gate=0;
     int partnerInterval=2;
     public void reboot(){ 
@@ -51,7 +67,7 @@ public class PeerNode extends Node {
     	
     	if (port == 20 || port == 100)
     	System.out.println("reboot is called....");    	
-    	if((this.searching||partners.getLength()==0)&&i++==4){
+    	if(((this.searching||partners.getLength()==0)&&i++==4)&&!isOutNow){
     	
     		this.deputyHops=4;
     		protocol.connectTo(0);
@@ -61,7 +77,7 @@ public class PeerNode extends Node {
     	}
     	else{
     		int size= partners.clearPartners();
-    		if(size==0){
+    		if(size==0&&!isOutNow){
     			this.deputyHops=4;
         		protocol.connectTo(0);
     		}
