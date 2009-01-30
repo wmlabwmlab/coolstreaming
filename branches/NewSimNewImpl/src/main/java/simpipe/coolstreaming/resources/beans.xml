@@ -10,7 +10,7 @@
 	<bean id="app_bean" class="simpipe.coolstreaming.Package">
 		<property name="partners" ref="current_partner" />
 		<property name="members" ref="current_member"/>
-		<property name="scheduler" ref="CoolStreamingScheduler"/>
+		<property name="scheduler" ref="CoolStreamingSchedulerWithTT"/>
 	</bean>
 
 </beans>

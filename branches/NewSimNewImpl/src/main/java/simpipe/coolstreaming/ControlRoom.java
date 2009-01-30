@@ -22,6 +22,7 @@ import org.apache.log4j.PatternLayout;
 import org.apache.log4j.SimpleLayout;
 
 import se.peertv.peertvsim.core.EventLoop;
+import se.peertv.peertvsim.core.Scheduler;
 import se.peertv.peertvsim.executor.SchedulingExecutor;
 import simpipe.base.support.SimPipeAddress;
 import simpipe.coolstreaming.implementations.Partner;
@@ -48,12 +49,17 @@ public class ControlRoom extends EventLoop{
 	public static boolean isAutomated=false;
 	public static int peers=25;
 	public static int seeds=30;
+	public static int leaving=5;
+	public static int peerLimit=5; // nonleaving number of peers in the network before declaring that the next peer is leaving
+	public static int leavingrate=-1;
 	public static int windowSize=30;
 	public static int slack=3;
 	public static int segment=1;
 	public static int exchange=30000;
+
 	public static String filename="outputs/CI.properties";
 	public static String input="exp";
+	
 	
 	
 	static Logger logger;
@@ -78,6 +84,7 @@ public class ControlRoom extends EventLoop{
 	
 	
 	int maxPeers=0;
+	int currentSources=0;
 	int[]empty={};
 	
 	public static int counts=0;
@@ -88,17 +95,14 @@ public class ControlRoom extends EventLoop{
 		Logger.getRootLogger().removeAllAppenders();
 		logger =Logger.getLogger("debugging_logger");
 		logger.setLevel((Level)Level.DEBUG);
-/*
- * this section is modified to import new sim
-*/    	
 		
-//		try{
-//			Timer timer = new Timer(creationRate,this,"createClient",(int)SimulableSystem.currentTimeMillis()+creationRate);
-//		}
-//		catch(Exception e){
-//			e.printStackTrace();
-//		}
 		displayBegin();
+	}
+	void init(){
+		if(leaving>0)
+			leavingrate = (int)Math.ceil((double)(peerNumber-peerLimit)/(double)leaving);
+		else
+			peerLimit=Integer.MAX_VALUE;
 	}
 	
 	public static void main(String[] args) throws Exception {
@@ -116,15 +120,25 @@ public class ControlRoom extends EventLoop{
 		        slack=Integer.parseInt((String)properties.get("slack"));
 		        exchange=Integer.parseInt((String)properties.get("exchangeTime"));
 		        segment=Integer.parseInt((String)properties.get("segment"));
+		        leaving = Integer.parseInt((String)properties.get("leave"));
 		        input=args[0];
-		        
 		        m.peerNumber=peers;
 		        m.sourceNumber=seeds;
+		        m.init();
 		        
 		    } 
 		    catch (IOException e) {
+		    	System.out.println("Config file failed while loading");
+		    	try {
+					Thread.sleep(10000);
+				} catch (Exception e2) {
+					// TODO: handle exception
+				}
 		    }
 		    
+		}
+		else{
+			m.init();
 		}
 		m.createServer();
 		
@@ -146,13 +160,29 @@ public class ControlRoom extends EventLoop{
 		double rand=Math.random();
 		
 		if(maxPeers<sourceNumber){
-			client[maxPeers]= new PeerNode(true,serverAddress,portStart+maxPeers);
+			client[maxPeers]= new PeerNode(true,serverAddress,portStart+maxPeers,false,0);
 			maxPeers++;
-			
+			currentSources++;
 		}
 		else{
 			if(maxPeers<(peerNumber+sourceNumber)){
-				client[maxPeers]= new PeerNode(false,serverAddress,portStart+maxPeers);
+				int currentPeers=maxPeers-currentSources;
+				if(currentPeers%leavingrate==0&& currentPeers>=peerLimit){
+					int range = Math.abs((int)SimulableSystem.currentTimeMillis()-(Node.videoSize*1000));
+					int time =(int)((Math.random()*range)+2000);
+					client[maxPeers]= new PeerNode(false,serverAddress,portStart+maxPeers,true,time);
+					System.err.println(currentPeers+" ::: "+"peer "+(portStart+maxPeers)+"will end in "+(time+(int)SimulableSystem.currentTimeMillis()));
+				
+					try{
+						Thread.sleep(1000);
+					}
+					catch (Exception e) {
+						// TODO: handle exception
+					}
+				}
+				else
+					client[maxPeers]= new PeerNode(false,serverAddress,portStart+maxPeers,false,0);
+				
 				maxPeers++;
 				
 			}
@@ -199,7 +229,9 @@ public class ControlRoom extends EventLoop{
 	 public  void displayEnd(){
 		 System.out.println("END");
 		 if(!isAutomated){
-		 for(int i=0;i<client.length;i++){
+			 TimeSlot sSlot1 = new TimeSlot();
+			 double CIs[] = new double[client.length]; 		 
+			 for(int i=0;i<client.length;i++){
 			 if(client[i]==null)
 				 continue;
 			 if(!client[i].isSource)
@@ -208,6 +240,14 @@ public class ControlRoom extends EventLoop{
 				 logger.info("[Peer "+client[i].port+"] : Source");
 			 	 
 			 double CI=((double)client[i].continuityIndex)/((double)client[i].allIndex);
+			 
+			 if(Double.isNaN(CI))
+					CI=1;
+			 CIs[i]=CI;
+			 sSlot1.add(new DataStructure(CIs,""));
+			 visual[4].add(sSlot1);
+			 
+			 
 			 logger.info("continuity index = "+CI);
 			 logger.info("Joined at time = "+client[i].joinTime);
 			 String partners = "My Partners are  : ";
@@ -243,21 +283,27 @@ public class ControlRoom extends EventLoop{
 			 visual[k].view(0); 
 		 }
 		 new ViewApp(visual);
-		 System.err.println("---> "+counts);
-		 System.err.println("---> "+slotcount);
+		 double AVG=collectCI();
+		 
+		 System.err.println("counts    ---> "+counts);
+		 System.err.println("slotcount ---> "+slotcount);
+		 System.err.println("CI ---> "+AVG);
 		 tracker.protocol.acceptor.unbindAll();
 		 for(int i=0;i<client.length;i++){
 			 client[i].protocol.disconnect();
 		 }
 		 }
 		 else{
+			 /*
 			 double sum=0;
 			 for(int i=0;i<ciBuffer.size();i++){
 				 Double ci= ciBuffer.get(i);
 				 sum+=ci.doubleValue();
 			 }
 			 double AVG = sum/ciBuffer.size();
-			 System.err.println(AVG);
+			 */
+			 double AVG=collectCI();
+			 System.err.println("CI = "+AVG);
 			 Properties properties= new Properties();
 			 try {
 				 properties.load(new FileInputStream(filename));
@@ -320,11 +366,11 @@ public class ControlRoom extends EventLoop{
 			fillPCacheOverPeers();
 			fillPScoreOverPeers();
 			fillPScoreOverNetwork();
-			fillContinuityIndex();
+			//fillContinuityIndex();
 			partnershipStat();
 			}
 			else{
-				collectCI();
+				//collectCI();
 			}
 			
 			/*
@@ -343,20 +389,20 @@ public class ControlRoom extends EventLoop{
 											snapShotRate, TimeUnit.MILLISECONDS);
 	}
 
-	void collectCI(){
-		double threshold=1;
-		TimeSlot sSlot1 = new TimeSlot();
+	double collectCI(){
 		double CIs[] = new double[client.length]; 
 		for(int i=0;i<client.length;i++)
 			if(client[i]!=null){
 				if(!client[i].isSource){
-					double CI=(((double)client[i].continuityIndex)/((double)client[i].allIndex));
-					if(Double.isNaN(CI))
-						CI=1;
-					if(CI>threshold)
-						CI=threshold;
-				
-					CIs[i]=CI;
+					//if(client[i].isLeaving){
+					//	int mustHave = client[i].leavingTime+client[i].joinTime;
+					//}
+					//else{
+						double CI=(((double)client[i].continuityIndex)/((double)client[i].allIndex));
+						if(Double.isNaN(CI))
+							CI=1;
+						CIs[i]=CI;
+					//}
 				}
 				else {
 					CIs[i]=-1;
@@ -375,10 +421,10 @@ public class ControlRoom extends EventLoop{
 			}
 		}
 		if (count==0)
-			return;
+			return 1;
 		Double avg = new Double(sum/count);
 		ciBuffer.add(avg);
-
+		return avg;
 	}
 	
 	
