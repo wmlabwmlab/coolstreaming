@@ -39,7 +39,7 @@ public class ControlRoom extends EventLoop{
 	//Static automated variables
 	public static boolean isAutomated=false;
 	public static int peers=25;
-	public static int seeds=30;
+	public static int seeds=1;
 	public static int leaving=5;
 	public static int peerLimit=5; // nonleaving number of peers in the network before declaring that the next peer is leaving
 	public static int leavingrate=-1;
@@ -55,8 +55,8 @@ public class ControlRoom extends EventLoop{
 	public static int refreshVideoBufferRate = (leadFactor/2) * 1000;
 	
 	static Logger logger;
-	int peerNumber=20;
-	int sourceNumber=5;
+	int peerNumber=25;
+	int sourceNumber=1;
 	int creationRate = 500; // 1 client per 0.5 minute 
 	int portStart=15;
 	int trackerCapacity=300;
@@ -117,6 +117,8 @@ public class ControlRoom extends EventLoop{
 		        input=args[0];
 		        m.peerNumber=peers;
 		        m.sourceNumber=seeds;
+		    	leadFactor = windowSize * 2;
+		    	refreshVideoBufferRate = (leadFactor/2) * 1000;		        
 		        m.init();
 		        
 		    } 
