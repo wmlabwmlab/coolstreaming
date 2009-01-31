@@ -21,5 +21,6 @@ public interface Scheduler {
 	void setStartTime(int start);
 	public void subscribe(char header);
 	public void fire(char header);
+	void setWholeBits(int startIndex, int endIndex, int value);
 	
 }
