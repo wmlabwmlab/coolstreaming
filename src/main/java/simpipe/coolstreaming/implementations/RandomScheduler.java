@@ -44,12 +44,12 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 		fillDeadLine();
 		wholeBits=new int[node.getVideoSize()];
 		supplier=new int[node.getWindowSize()];
-		if(node.isSource())
-		{
-			for(int i=0;i<node.getVideoSize();i++){
-				wholeBits[i]=1;
-			}
-		}
+//		if(node.isSource())
+//		{
+//			for(int i=0;i<node.getVideoSize();i++){
+//				wholeBits[i]=1;
+//			}
+//		}
 	}
 	
 	@Override
@@ -284,6 +284,12 @@ public class RandomScheduler implements simpipe.coolstreaming.interfaces.Schedul
 	}
 	public void fire(char header){
 		
+	}
+	
+	@Override
+	public void setWholeBits(int startIndex,int endIndex, int value) {
+		for (int i = startIndex; (i <= endIndex) && (i<wholeBits.length);i++ )
+			wholeBits[i]=value;
 	}
 	
 }
