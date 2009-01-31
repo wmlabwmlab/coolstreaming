@@ -212,12 +212,12 @@ public class CSwithTransferTimeScheduler implements simpipe.coolstreaming.interf
 		fillDeadLine();
 		wholeBits=new int[node.getVideoSize()];
 	//	supplier=new int[node.windowSize];
-		if(node.isSource())
-		{
-			for(int i=0;i<node.getVideoSize();i++){
-				wholeBits[i]=1;
-			}
-		}
+//		if(node.isSource())
+//		{
+//			for(int i=0;i<node.getVideoSize();i++){
+//				wholeBits[i]=1;
+//			}
+//		}
 
 	}
 
