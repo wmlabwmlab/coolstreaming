@@ -232,6 +232,13 @@ public class CSwithTransferTimeScheduler implements simpipe.coolstreaming.interf
 		wholeBits[index]=value;
 
 	}
+	
+	@Override
+	public void setWholeBits(int startIndex,int endIndex, int value) {
+		for (int i = startIndex; (i <= endIndex) && (i<wholeBits.length);i++ )
+			wholeBits[i]=value;
+	}
+	
 	@Override
 	public int getDeadLine(int index) {
 		return deadLine[index];
