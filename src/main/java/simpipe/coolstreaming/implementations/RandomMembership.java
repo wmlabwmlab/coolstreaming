@@ -76,6 +76,8 @@ public class RandomMembership implements Membership {
 //    			Member m = new Member(port,new Timer(deleteTime,(Object)this,"deleteMember",port));
 	    	
 	    	if(index == -1 || !mCache[index].scheduledTask.isCancelled()){
+	    		if(index != -1) // this means that the scheduledTask is not cancelled 
+	    			mCache[index] = null;
     			Member m = new Member(port,
     					new SchedulingExecutor(System.currentTimeMillis()).schedule(new Runnable(){
     											public void run(){deleteMember(port);}},
