@@ -10,19 +10,14 @@ import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import javax.swing.JOptionPane;
-import javax.swing.plaf.basic.BasicScrollPaneUI.VSBChangeListener;
-
+import org.apache.commons.math.stat.StatUtils;
 import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import se.peertv.peertvsim.SimulableSystem;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.SimpleLayout;
 
 import se.peertv.peertvsim.core.EventLoop;
-import se.peertv.peertvsim.core.Scheduler;
+
 import se.peertv.peertvsim.executor.SchedulingExecutor;
 import simpipe.base.support.SimPipeAddress;
 import simpipe.coolstreaming.implementations.Partner;
@@ -37,10 +32,6 @@ import simpipe.coolstreaming.visualization.PScoreOverPeers;
 import simpipe.coolstreaming.visualization.TimeSlot;
 import simpipe.coolstreaming.visualization.ViewApp;
 import simpipe.coolstreaming.visualization.Visualization;
-
-import org.apache.commons.math.stat.*;
-import org.hamcrest.core.IsAnything;
-
 
 public class ControlRoom extends EventLoop{
 
@@ -60,7 +51,8 @@ public class ControlRoom extends EventLoop{
 	public static String filename="outputs/CI.properties";
 	public static String input="exp";
 	
-	
+	public static int leadFactor = windowSize * 2;
+	public static int refreshVideoBufferRate = (leadFactor/2) * 1000;
 	
 	static Logger logger;
 	int peerNumber=20;
@@ -79,6 +71,7 @@ public class ControlRoom extends EventLoop{
 	
 	SocketAddress serverAddress;
 	PeerNode client[];
+	PeerNode sources[];
 	CentralNode tracker;
 	Visualization visual[];
 	
@@ -143,6 +136,7 @@ public class ControlRoom extends EventLoop{
 		m.createServer();
 		
 		m.client = new PeerNode[m.peerNumber+m.sourceNumber];
+		m.sources = new PeerNode[m.sourceNumber];
 		new SchedulingExecutor(System.currentTimeMillis()).scheduleAtFixedRate(
 															new Runnable(){	public void run(){m.createClient();}},
 															m.creationRate,m.creationRate,TimeUnit.MILLISECONDS,m.peerNumber+m.sourceNumber);
@@ -161,8 +155,15 @@ public class ControlRoom extends EventLoop{
 		
 		if(maxPeers<sourceNumber){
 			client[maxPeers]= new PeerNode(true,serverAddress,portStart+maxPeers,false,0);
+			sources[maxPeers] = client[maxPeers];
+			sources[maxPeers].scheduler.setWholeBits(0, leadFactor,1);
 			maxPeers++;
 			currentSources++;
+			if(maxPeers == sourceNumber){
+				new SchedulingExecutor(System.currentTimeMillis()).scheduleAtFixedRate(
+						new Runnable(){	public void run(){refreshVideoBuffer();}},
+						0,refreshVideoBufferRate,TimeUnit.MILLISECONDS);				
+			}
 		}
 		else{
 			if(maxPeers<(peerNumber+sourceNumber)){
@@ -200,6 +201,18 @@ public class ControlRoom extends EventLoop{
 //		}
 	}
 	
+	private void refreshVideoBuffer(){
+		int now = (int)SimulableSystem.currentTimeMillis();
+		int diff= 0;
+		PeerNode aSource = null;
+		for(int i = 0; i < sourceNumber;i++){
+			aSource = sources[i];
+			
+			diff = (now - 0)/1000;
+			System.out.println(now+" - "+aSource.startTime+"/1000 = "+diff);
+			aSource.scheduler.setWholeBits(0, (diff+leadFactor),1);
+		}
+	}
 	
 	public void createServer() throws Exception{			
 		BasicConfigurator.configure();
