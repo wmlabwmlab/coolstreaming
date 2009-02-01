@@ -3,6 +3,7 @@ package simpipe.coolstreaming.implementations;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
+import se.peertv.peertvsim.SimulableSystem;
 import se.peertv.peertvsim.core.Timer;
 import se.peertv.peertvsim.executor.SchedulingExecutor;
 import simpipe.coolstreaming.interfaces.Membership;
@@ -12,7 +13,8 @@ public class RandomMembership implements Membership {
 	private Member[] mCache;
 	int mSize=0;
 	int port;
-	int deleteTime=15000;
+	int deleteTimeThreshold=15000;
+	int checkInterval = 2000;
 	
 	public RandomMembership() {
 	}
@@ -22,15 +24,15 @@ public class RandomMembership implements Membership {
     }
 	
 	@Override
-	public void setParams(int mSize, int port, int deleteTime) {
+	public void setParams(int mSize, int port, int deleteTimeThreshold) {
 		// TODO Auto-generated method stub
 		this.port=port;
     	mCache =new Member[mSize];
         this.mSize=mSize;
-        this.deleteTime = deleteTime;
+        this.deleteTimeThreshold = deleteTimeThreshold;
         new SchedulingExecutor(System.currentTimeMillis()).scheduleAtFixedRate(new Runnable(){
 			public void run(){refreshCache();}},
-			deleteTime, deleteTime, TimeUnit.MILLISECONDS);
+			checkInterval, checkInterval, TimeUnit.MILLISECONDS);
         
 	}
 	@Override
@@ -55,10 +57,11 @@ public class RandomMembership implements Membership {
 	public synchronized void addMember(final int port){
     	int index=getIndex(port);
     	if(index != -1){
-	    		mCache[index].alive = true;	    		
+	    		mCache[index].latestAlive = SimulableSystem.currentTimeMillis();
+	    		mCache[index].alive = true;
     	}
     	else{
-   			Member m = new Member(port,true);
+   			Member m = new Member(port,true,SimulableSystem.currentTimeMillis());
    			if(getLength()==mSize){ //the member buffer is full
     			int i = ((int)(Math.random()*mSize))%mSize;
     			mCache[i]=m;
@@ -76,8 +79,8 @@ public class RandomMembership implements Membership {
 	@Override	 
 	public synchronized void refreshCache(){
 	    	for(int i=0;i<mCache.length;i++)
-	    		if(mCache[i]!=null && mCache[i].port==port){
-	    			if(!mCache[i].alive)
+	    		if((mCache[i] != null) && (mCache[i].port == port)){
+	    			if((SimulableSystem.currentTimeMillis() - mCache[i].latestAlive) >= deleteTimeThreshold)
 	    				mCache[i] = null;
 	    			else
 	    				mCache[i].alive = false;
