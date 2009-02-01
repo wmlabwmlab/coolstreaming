@@ -1,13 +1,11 @@
 package simpipe.coolstreaming.implementations;
 
-import java.util.concurrent.ScheduledFuture;
-
 public class Member {
 	int port;
-	ScheduledFuture<?> scheduledTask;
+	boolean alive = true;
 
-	public Member(int port, ScheduledFuture<?> scheduledTask){
+	public Member(int port, boolean alive){
 		this.port = port;
-		this.scheduledTask = scheduledTask;
+		this.alive = alive;
 	}
 }

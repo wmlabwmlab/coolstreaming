@@ -12,16 +12,13 @@ public class RandomMembership implements Membership {
 	private Member[] mCache;
 	int mSize=0;
 	int port;
-	int deleteTime=30000;
+	int deleteTime=15000;
 	
 	public RandomMembership() {
 	}
 
 	public RandomMembership(int mSize,int port,int deleteTime){
-    	this.port=port;
-    	mCache =new Member[mSize];
-        this.mSize=mSize;
-        this.deleteTime = deleteTime;
+		setParams(mSize,port,deleteTime);
     }
 	
 	@Override
@@ -31,6 +28,10 @@ public class RandomMembership implements Membership {
     	mCache =new Member[mSize];
         this.mSize=mSize;
         this.deleteTime = deleteTime;
+        new SchedulingExecutor(System.currentTimeMillis()).scheduleAtFixedRate(new Runnable(){
+			public void run(){refreshCache();}},
+			deleteTime, deleteTime, TimeUnit.MILLISECONDS);
+        
 	}
 	@Override
 	public synchronized int getLength(){ 
@@ -52,69 +53,34 @@ public class RandomMembership implements Membership {
 	
 	@Override	
 	public synchronized void addMember(final int port){
- 		try{	    	
-	    	int index=getIndex(port);
-	    	if(index!=-1){
-    			/*
-    			 * this section has been commented to import the new sim
-    			 */
-//	    		mCache[index].timer.reset();
-//	    		mCache[index].timer=new Timer(deleteTime,(Object)this,"deleteMember",port);
-	    		mCache[index].scheduledTask.cancel(true);
-	    		if(mCache[index].scheduledTask.isCancelled())
-	    			mCache[index].scheduledTask = new SchedulingExecutor(System.currentTimeMillis()).schedule(new Runnable(){
-	    											public void run(){deleteMember(port);}},
-	    												deleteTime, TimeUnit.MILLISECONDS);	    		
-	    	}
-    		/*
-    		 * this section has been commented to import the new sim
-    		 */	    	
-//	    	else{
-//	    		/*
-//	    		 * this section has been commented to import the new sim
-//	    		 */
-//    			Member m = new Member(port,new Timer(deleteTime,(Object)this,"deleteMember",port));
-	    	
-	    	if(index == -1 || !mCache[index].scheduledTask.isCancelled()){
-	    		if(index != -1) // this means that the scheduledTask is not cancelled 
-	    			mCache[index] = null;
-    			Member m = new Member(port,
-    					new SchedulingExecutor(System.currentTimeMillis()).schedule(new Runnable(){
-    											public void run(){deleteMember(port);}},
-    												deleteTime, TimeUnit.MILLISECONDS));
-	    	if(getLength()==mSize){ //the member buffer is full
-	    			int i = ((int)(Math.random()*mSize))%mSize;
-//    				mCache[i].timer.reset();  //has been commented to import the new sim
-		    		mCache[i]=m;
-	    		}
-	    		else{
-	    			for(int i=0;i<mCache.length;i++)
-	    	    		if(mCache[i]==null){
-	    		    		mCache[i]=m;
-	    	    			break;
-	    	    		}
-	    		}
-	    	}
+    	int index=getIndex(port);
+    	if(index != -1){
+	    		mCache[index].alive = true;	    		
     	}
-    	catch (Exception e) {
-				e.printStackTrace();
-		}
-	  }
+    	else{
+   			Member m = new Member(port,true);
+   			if(getLength()==mSize){ //the member buffer is full
+    			int i = ((int)(Math.random()*mSize))%mSize;
+    			mCache[i]=m;
+    		}
+    		else{
+    			for(int i=0;i<mCache.length;i++)
+    	    		if(mCache[i]==null){
+    		    		mCache[i]=m;
+    	    			break;
+    	    		}
+    		}
+    	}
+	}
 	 
 	@Override	 
-	public synchronized void deleteMember(int port){
+	public synchronized void refreshCache(){
 	    	for(int i=0;i<mCache.length;i++)
-	    		if(mCache[i]!=null)
-	    		if(mCache[i].port==port){
-	    			try{
-//	    				mCache[i].timer.reset();  //has been commented to import the new sim
-	    				mCache[i].scheduledTask.cancel(true);
-	    			}
-	    			catch (Exception e) {
-	    				e.printStackTrace();
-					}
-	    			mCache[i]=null;
-	    			return;
+	    		if(mCache[i]!=null && mCache[i].port==port){
+	    			if(!mCache[i].alive)
+	    				mCache[i] = null;
+	    			else
+	    				mCache[i].alive = false;
 	    		}
 	    }
 	 
