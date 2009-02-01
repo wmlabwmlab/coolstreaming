@@ -43,8 +43,8 @@ public class ControlRoom extends EventLoop{
 	public static int leaving=5;
 	public static int peerLimit=5; // nonleaving number of peers in the network before declaring that the next peer is leaving
 	public static int leavingrate=-1;
-	public static int windowSize=30;
-	public static int slack=3;
+	public static int windowSize=120;
+	public static int slack=30;
 	public static int segment=1;
 	public static int exchange=30000;
 
@@ -118,7 +118,7 @@ public class ControlRoom extends EventLoop{
 		        m.peerNumber=peers;
 		        m.sourceNumber=seeds;
 		    	leadFactor = windowSize * 2;
-		    	refreshVideoBufferRate = (leadFactor/2) * 1000;		        
+		    	refreshVideoBufferRate = (leadFactor/4) * 1000;		        
 		        m.init();
 		        
 		    } 
@@ -164,7 +164,7 @@ public class ControlRoom extends EventLoop{
 			if(maxPeers == sourceNumber){
 				new SchedulingExecutor(System.currentTimeMillis()).scheduleAtFixedRate(
 						new Runnable(){	public void run(){refreshVideoBuffer();}},
-						0,refreshVideoBufferRate,TimeUnit.MILLISECONDS);				
+						refreshVideoBufferRate,refreshVideoBufferRate,TimeUnit.MILLISECONDS);				
 			}
 		}
 		else{
