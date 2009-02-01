@@ -26,7 +26,7 @@ public class Node {
 	final int pSize=4;
     final int mSize=20;
     int deputyHops=5;
-    int deleteTime=70000; // time to delete the members from the mCache
+    int deleteTime=30000; // time to delete the members from the mCache
     int bootTime=3000;
     int continuityIndex;
     int allIndex; // it is all the segments that I've received (doesnt matter if its deadline came or not when it is received)
