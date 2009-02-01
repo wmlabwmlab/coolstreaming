@@ -9,7 +9,7 @@ public interface Membership {
 	int getLength();
 	int getIndex(int value);
 	void addMember(int port);
-	void deleteMember(int port);
+	void refreshCache();
 	int getAnotherDeputy(int destPort);
 	int[] toArray();
 	void setMember(int index,Member m);
