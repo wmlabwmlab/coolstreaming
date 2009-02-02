@@ -206,6 +206,7 @@ public class CSwithTransferTimeScheduler implements simpipe.coolstreaming.interf
 	@Override
 	public void setParams(PeerNode node, int startTime) {
 		if(ControlRoom.isAutomated){
+			node.slack=ControlRoom.slack;
 			slack=ControlRoom.slack;
 			exchangeTime = ControlRoom.exchange;
 			node.setWindowSize(ControlRoom.windowSize);
