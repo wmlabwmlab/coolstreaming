@@ -1,4 +1,4 @@
-<project name="CoolStreaming" default="build-both" basedir="." xmlns:artifact="urn:maven-artifact-ant">
+<project name="CoolStreaming" default="run" basedir="." xmlns:artifact="urn:maven-artifact-ant">
 <path id="build.classpath">
       
       <fileset dir="lib/" >
@@ -34,7 +34,12 @@
         <artifact:dependencies filesetId="maven-ant-tasks.dependency.fileset" pathId="dependency.classpath">
        		<pom refid="maven.project"/>
        	</artifact:dependencies>
-        <java jvmargs="-Xms512m -Xmx512m -XX:PermSize=128m -XX:MaxPermSize=128m" classpath="target/classes" classname="${mainpackage}.ControlRoom" fork="true" args="${file}">
+        <java classpath="target/classes" classname="${mainpackage}.ControlRoom" fork="true">
+        	<arg file="${file}"/>
+        	<jvmarg value="-Xms512m"/>
+        	<jvmarg value="-Xmx750m"/>
+        	<jvmarg value="-XX:PermSize=128m"/>
+        	<jvmarg value="-XX:MaxPermSize=128m"/>
         	<classpath refid="build.classpath" />
         	<classpath refid="dependency.classpath" />
         </java>
