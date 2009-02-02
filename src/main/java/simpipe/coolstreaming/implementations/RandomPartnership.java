@@ -36,7 +36,7 @@ public class RandomPartnership implements Partnership {
         
         this.node=newNode;
     	if( node != null && node.isSource())
-    		this.pSize=newPSize * 2;
+    		this.pSize=newPSize * 1;
     	else
     		this.pSize=newPSize;
     	pCache =new Partner[pSize];
