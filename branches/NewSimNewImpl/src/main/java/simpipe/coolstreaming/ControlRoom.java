@@ -261,15 +261,15 @@ public class ControlRoom extends EventLoop{
 			 CIs[i]=CI;
 			 sSlot1.add(new DataStructure(CIs,""));
 			 visual[4].add(sSlot1);
-			 
-			 
+			 			 
 			 logger.info("continuity index = "+CI);
 			 logger.info("ALL got = "+(double)client[i].continuityIndex);
 			 logger.info("Must get = "+(double)client[i].allIndex);
 			 logger.info("Joined at time = "+client[i].joinTime);
 			 logger.info("Must play from = "+client[i].playTime);
 			 String partners = "My Partners are  : ";
-			 for(int j=0;j<client[i].pSize;j++){
+			 int x = client[i].partners.getCache().length;
+			 for(int j=0;j < x;j++){
 	    		if(client[i].partners.getPartner(j)!=null)
 	    			partners+="  [ "+(client[i].partners.getPartner(j).getPort())+" ]";
 	    	 }
