@@ -14,7 +14,7 @@ public class RandomMembership implements Membership {
 	int mSize=0;
 	int port;
 	int deleteTimeThreshold=15000;
-	int checkInterval = 5000;
+	int checkInterval = 5000; // every 5 seconds check the mcache
 	
 	public RandomMembership() {
 	}
