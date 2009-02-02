@@ -13,7 +13,7 @@ public class Gossip {
 	
 	private PeerNode node;
     //Gossip parameters
-    public int gossipTime=15000;
+    public int gossipTime=10000;
     private final int hops=4;
     
 	public Gossip(PeerNode node){
