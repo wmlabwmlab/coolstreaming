@@ -57,7 +57,7 @@ public class ControlRoom extends EventLoop{
 	static Logger logger;
 	int peerNumber=25;
 	int sourceNumber=1;
-	int creationRate = 500; // 1 client per 0.5 minute 
+	int creationRate = 500; // 1 client per 0.5 second 
 	int portStart=15;
 	int trackerCapacity=300;
 	ArrayList<Double> ciBuffer = new ArrayList<Double>();
