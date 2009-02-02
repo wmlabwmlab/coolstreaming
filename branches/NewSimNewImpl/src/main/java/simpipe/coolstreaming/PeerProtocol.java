@@ -66,7 +66,10 @@ public class PeerProtocol extends IoHandlerAdapter{
 		}
 
 		session.write(""+Constants.PARTNERSHIP_REQUEST+node.port);
+		node.committed.add(session);
 		ControlRoom.counts++;
+		committed++;
+
 	}
 
 	

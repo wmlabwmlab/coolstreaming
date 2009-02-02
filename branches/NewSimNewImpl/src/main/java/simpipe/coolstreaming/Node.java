@@ -1,10 +1,16 @@
 package simpipe.coolstreaming;
 
+import java.util.ArrayList;
+
+import org.apache.mina.common.IoSession;
+
 import simpipe.coolstreaming.interfaces.*;
 
 
 public class Node {
 	
+    public ArrayList<IoSession> committed = new ArrayList<IoSession>();
+
 	boolean isTracker=false;
 	int port;
 	boolean isSource=false;
@@ -34,7 +40,7 @@ public class Node {
     final int defaultBandwidth=256;
   
   //Video parameters
-    int windowSize=60;	//30 sec
+    int windowSize=120;	//30 sec
     public static int videoSize=870;  //14.5 min., used to be 120sec 
     int segmentSize=256; //256 Kb = 32 KB for one sec
     BitField myBuffer;

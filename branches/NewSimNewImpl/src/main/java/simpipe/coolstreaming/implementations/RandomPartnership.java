@@ -92,6 +92,18 @@ public class RandomPartnership implements Partnership {
     			return true;
     		}
     	}
+    	else if(node.committed.size()>0){
+    		for(int i=0;i<pCache.length;i++)
+        		if(pCache[i]==null){
+        			IoSession session2=node.committed.get(0);
+            		node.protocol.committed--;
+            		session2.close();
+            		node.committed.remove(0);
+            		pCache[i]= new Partner(port,defaultBandwidth,session,new BitField(windowSize));
+        			return true;
+        		}
+    		
+    	}
     	return false;
     }
     

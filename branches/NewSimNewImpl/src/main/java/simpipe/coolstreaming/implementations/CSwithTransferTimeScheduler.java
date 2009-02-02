@@ -23,7 +23,7 @@ public class CSwithTransferTimeScheduler implements simpipe.coolstreaming.interf
 	private int wholeBits[];
 	private int deadLine[];
 //	private int supplier[];
-	private int slack=10;
+	private int slack=30;
 	private int exchangeTime=10000;//request map every 30 sec
 	private int timeSlot;
 	private boolean requesting=false;
@@ -105,7 +105,10 @@ public class CSwithTransferTimeScheduler implements simpipe.coolstreaming.interf
 				}
 			}
 		}
-			
+		//if(node.getPort()==37)
+		//for(int i=0;i<field.a1.size();i++)
+		//	System.err.print(field.a1.get(i));
+		//System.err.println("=======================================");
 		return field;
 	}
 

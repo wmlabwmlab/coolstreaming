@@ -124,7 +124,8 @@ public class NetworkVisualization extends Visualization{
 			for(int j=0;j<members.length;j++)
 				if(members[j]!=0){
 					String edgeName=""+count;
-					g.addEdge(edgeName,Integer.parseInt(timeSlot.slots.get(i).id),(int)members[j],EdgeType.DIRECTED);
+					if(Integer.parseInt(timeSlot.slots.get(i).id)<(int)members[j])
+					g.addEdge(edgeName,Integer.parseInt(timeSlot.slots.get(i).id),(int)members[j],EdgeType.UNDIRECTED);
 					count++;
 				}
 		}
