@@ -210,6 +210,9 @@ public class CSwithTransferTimeScheduler implements simpipe.coolstreaming.interf
 			exchangeTime = ControlRoom.exchange;
 			node.setWindowSize(ControlRoom.windowSize);
 		}
+		else{
+			slack = node.slack;
+		}
 		this.node=node;
 		this.startTime = startTime;
 		fillDeadLine();

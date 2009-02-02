@@ -42,6 +42,7 @@ public class PeerNode extends Node {
 				public void run(){quit();}},
 					leavingTime,TimeUnit.MILLISECONDS);
     	}
+    	
     }
 
     public void quit(){
