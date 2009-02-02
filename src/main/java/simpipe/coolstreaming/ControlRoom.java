@@ -40,7 +40,7 @@ public class ControlRoom extends EventLoop{
 	public static boolean isAutomated=false;
 	public static int peers=25;
 	public static int seeds=1;
-	public static int leaving=5;
+	public static int leaving=0;
 	public static int peerLimit=5; // nonleaving number of peers in the network before declaring that the next peer is leaving
 	public static int leavingrate=-1;
 	public static int windowSize=120;
@@ -137,7 +137,7 @@ public class ControlRoom extends EventLoop{
 		}
 		m.createServer();
 		
-		m.client = new PeerNode[m.peerNumber+m.sourceNumber];
+		m.client = new PeerNode[m.peerNumber+m.sourceNumber+m.leaving];
 		m.sources = new PeerNode[m.sourceNumber];
 		new SchedulingExecutor(System.currentTimeMillis()).scheduleAtFixedRate(
 															new Runnable(){	public void run(){m.createClient();}},
@@ -151,12 +151,19 @@ public class ControlRoom extends EventLoop{
 		}
 	}	
 	
+	public void addClient(){
+		if(maxPeers<peerNumber+sourceNumber+leaving){
+			client[maxPeers]= new PeerNode(false,serverAddress,portStart+maxPeers,false,0,this);
+			maxPeers++;
+		}
+	}
+	
 	public void createClient(){
 		tracker.members.clearPartners();
 		double rand=Math.random();
 		
 		if(maxPeers<sourceNumber){
-			client[maxPeers]= new PeerNode(true,serverAddress,portStart+maxPeers,false,0);
+			client[maxPeers]= new PeerNode(true,serverAddress,portStart+maxPeers,false,0,this);
 			sources[maxPeers] = client[maxPeers];
 			sources[maxPeers].scheduler.setWholeBits(0, leadFactor,1);
 			maxPeers++;
@@ -173,18 +180,11 @@ public class ControlRoom extends EventLoop{
 				if(currentPeers%leavingrate==0&& currentPeers>=peerLimit){
 					int range = Math.abs((int)SimulableSystem.currentTimeMillis()-(Node.videoSize*1000));
 					int time =(int)((Math.random()*range)+2000);
-					client[maxPeers]= new PeerNode(false,serverAddress,portStart+maxPeers,true,time);
-					System.err.println(currentPeers+" ::: "+"peer "+(portStart+maxPeers)+"will end in "+(time+(int)SimulableSystem.currentTimeMillis()));
-				
-					try{
-						Thread.sleep(1000);
-					}
-					catch (Exception e) {
-						// TODO: handle exception
-					}
+					client[maxPeers]= new PeerNode(false,serverAddress,portStart+maxPeers,true,time,this);
+					
 				}
 				else
-					client[maxPeers]= new PeerNode(false,serverAddress,portStart+maxPeers,false,0);
+					client[maxPeers]= new PeerNode(false,serverAddress,portStart+maxPeers,false,0,this);
 				
 				maxPeers++;
 				

@@ -1,6 +1,7 @@
 package simpipe.coolstreaming;
 
 import java.net.SocketAddress;
+import java.util.ArrayList;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -26,14 +27,16 @@ public class PeerNode extends Node {
     int time=0;
     IoSession serverBond;
     int i=0;
+    ControlRoom crm;
     
-    PeerNode(boolean source,SocketAddress serverAdderess,int port,boolean leaving , int time){
+    PeerNode(boolean source,SocketAddress serverAdderess,int port,boolean leaving , int time,ControlRoom crm){
     	this.isLeaving = leaving;
     	this.leavingTime = time;
     	isSource=source;
     	this.port=port;
     	protocol = new PeerProtocol(serverAdderess,this);
     	if(isLeaving){
+    		this.crm=crm;
     		ScheduledFuture<?> scheduledTask;
     		scheduledTask = new SchedulingExecutor(System.currentTimeMillis()).schedule(new Runnable(){
 				public void run(){quit();}},
@@ -45,28 +48,26 @@ public class PeerNode extends Node {
     	for(int i=0;i<pSize;i++){
     		if(partners.getPartner(i)!=null)
     		partners.getPartner(i).getSession().close();
+    		crm.addClient();
     	}
     	isOutNow=true;
     }
-    
-    int gate=0;
-    int partnerInterval=2;
+    //int gate=0;
+    //int partnerInterval=2;
     public void reboot(){ 
-    	gate++;
-    	if(gate%partnerInterval==0){
-    		
+    	//gate++;
+    	//if(gate%partnerInterval==0){
+    	//{
     		if(partners.getLength()+protocol.committed < pSize){
     			int newNode=members.getStranger(partners);
     			if(newNode!=-1){
     				protocol.connectTo(newNode);
-    				protocol.committed++;
     			}
     		}
-    	}
+    	//}
     	
-    	
-    	if (port == 20 || port == 100)
-    	System.out.println("reboot is called....");    	
+    	//if (port == 20 || port == 100)
+    	//System.out.println("reboot is called....");    	
     	if(((this.searching||partners.getLength()==0)&&i++==4)&&!isOutNow){
     	
     		this.deputyHops=4;
