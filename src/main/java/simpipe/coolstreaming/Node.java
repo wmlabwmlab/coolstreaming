@@ -17,6 +17,7 @@ public class Node {
 	int dummy=400;
 	int startTime=200;
 	int joinTime=200;
+	int playTime=200;
 	
 	boolean isLeaving=false;
 	int leavingTime=30000;
@@ -29,8 +30,8 @@ public class Node {
   
   //main coolstreaming parameters
 	
-	final int pSize=4;
-    final int mSize=20;
+	int pSize=4;
+    int mSize=20;
     int deputyHops=5;
     int deleteTime=30000; // time to delete the members from the mCache
     int bootTime=3000;
@@ -44,6 +45,7 @@ public class Node {
     public static int videoSize=870;  //14.5 min., used to be 120sec 
     int segmentSize=256; //256 Kb = 32 KB for one sec
     BitField myBuffer;
+    public int slack = 1;
 
   
   

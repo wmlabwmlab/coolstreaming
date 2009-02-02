@@ -101,6 +101,8 @@ public class PeerProtocol extends IoHandlerAdapter{
 	        	ControlRoom.logger.debug("me "+node.port+" got "+msg+" , remainder"+node.deputyHops);
 	        	//System.out.println("me "+node.port+" got "+msg+" , remainder"+node.deputyHops);
 	        	node.joinTime=(int)SimulableSystem.currentTimeMillis();
+	        	if(node.joinTime-node.slack<=node.startTime)
+	        		node.playTime=node.startTime;
 	        	node.beginSceduling();
 	        	partnersMessage(msgPart2, session);	
 	        	break;
@@ -200,6 +202,8 @@ public class PeerProtocol extends IoHandlerAdapter{
     	else {
 			node.beginSceduling();
 			node.joinTime=(int)SimulableSystem.currentTimeMillis();
+			if(node.joinTime-node.slack<=node.startTime)
+        		node.playTime=node.startTime;
 			node.searching=false;
 		}
 	}

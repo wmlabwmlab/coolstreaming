@@ -264,7 +264,10 @@ public class ControlRoom extends EventLoop{
 			 
 			 
 			 logger.info("continuity index = "+CI);
+			 logger.info("ALL got = "+(double)client[i].continuityIndex);
+			 logger.info("Must get = "+(double)client[i].allIndex);
 			 logger.info("Joined at time = "+client[i].joinTime);
+			 logger.info("Must play from = "+client[i].playTime);
 			 String partners = "My Partners are  : ";
 			 for(int j=0;j<client[i].pSize;j++){
 	    		if(client[i].partners.getPartner(j)!=null)
@@ -361,7 +364,7 @@ public class ControlRoom extends EventLoop{
 				if(client[i]==null)
 					continue;
 				int now=(int)SimulableSystem.currentTimeMillis();
-				int missed=(client[i].joinTime-client[i].startTime);
+				int missed=(client[i].playTime-client[i].startTime);
 				/*if(i==8){
 					
 					System.err.println("now="+Scheduler.getInstance().now+" , join= "+client[i].joinTime+" , vsize+starttime= "+((client[i].videoSize*1000)+(client[i].startTime)));
@@ -373,8 +376,9 @@ public class ControlRoom extends EventLoop{
 					//client[i].allIndex=client[i].videoSize-(missed/1000);
 					//continue;
 				}
-				int mustHave=now-(client[i].joinTime);
-				client[i].allIndex=mustHave/1000;
+				int mustHave=now-(client[i].playTime);
+				client[i].allIndex=(mustHave/1000)+1;
+				
 			}
 			if(!isAutomated){
 			fillMCacheOverPeers();
