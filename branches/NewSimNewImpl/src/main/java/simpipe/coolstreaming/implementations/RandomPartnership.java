@@ -25,12 +25,7 @@ public class RandomPartnership implements Partnership {
     	
     }
     public RandomPartnership(int pSize,int port,int windowSize,int defaultBandwidth, PeerNode node ){
-    	this.port=port;
-    	this.windowSize=windowSize;
-    	this.defaultBandwidth=defaultBandwidth;
-    	pCache =new Partner[pSize];
-        this.pSize=pSize;
-        this.node=node;
+    	setParams(pSize, port, windowSize, defaultBandwidth, node);
     }
     
     @Override
@@ -38,10 +33,12 @@ public class RandomPartnership implements Partnership {
     	this.port=port;
     	this.windowSize=windowSize;
     	this.defaultBandwidth=defaultBandwidth;
-    	pCache =new Partner[pSize];
         this.pSize=pSize;
         this.node=node;
-    	
+    	if( node != null && node.isSource())
+    		pCache =new Partner[pSize * 2];
+    	else
+    		pCache =new Partner[pSize];
     }
     
     //gets the number of partners
